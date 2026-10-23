@@ -53,3 +53,23 @@ test('问题3：完成事项在所属模块进入已完成存档', { skip: !find
     await app.close(); rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('问题4：今日事项添加表单使用多行可见字段', { skip: !findBrowser() }, async () => {
+  const root = mkdtempSync(join(tmpdir(), 'pwla-today-form-'));
+  const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0, scheduler: false, persistDataRoot: false, nativeActions: false });
+  const base = `http://127.0.0.1:${app.port}`;
+  try {
+    const page = await dumpDom(`${base}/#/today`);
+    assert.equal(page.status, 0, page.stderr);
+    assert.match(page.stdout, /class="today-task-form"/);
+    assert.match(page.stdout, /class="form-grid today-task-grid"/);
+    assert.match(page.stdout, /事项标题/);
+    assert.match(page.stdout, /计划时间/);
+    assert.match(page.stdout, /优先级/);
+    assert.match(page.stdout, /重复规则/);
+    assert.match(page.stdout, /提前提醒（分钟）/);
+    assert.match(page.stdout, /添加今日事项/);
+  } finally {
+    await app.close(); rmSync(root, { recursive: true, force: true });
+  }
+});

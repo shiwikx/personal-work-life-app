@@ -315,18 +315,18 @@ async function renderToday() {
     `)}
     <section class="panel">
       <div class="panel-head"><div><p class="eyebrow">ADD</p><h2>添加今日事项</h2></div><span class="count">${data.items.length} 项未完成</span></div>
-      <form class="task-form" data-form="today-task">
-        <input name="title" placeholder="要做什么？" required />
-        <input name="scheduledTime" type="time" />
-        <select name="priority" title="优先级">${priorityOptions(0)}</select>
-        <select name="repeat">
-          <option value="none">不重复</option><option value="daily">每天</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="custom">自定义周期</option>
-        </select>
-        <input name="repeatInterval" type="number" min="1" value="1" title="重复间隔" />
-        <select name="repeatUnit" title="自定义周期单位"><option value="day">天</option><option value="week">周</option><option value="month">月</option></select>
-        <input name="reminderMinutes" type="number" min="0" value="10" title="提前提醒分钟" />
-        <input name="notes" placeholder="备注（可选）" />
-        <button class="primary" type="submit">添加</button>
+      <form class="today-task-form" data-form="today-task">
+        <div class="form-grid today-task-grid">
+          <label class="field wide"><span>事项标题</span><input name="title" placeholder="要做什么？" required /></label>
+          <label class="field"><span>计划时间</span><input name="scheduledTime" type="time" /></label>
+          <label class="field"><span>优先级</span><select name="priority">${priorityOptions(0)}</select></label>
+          <label class="field"><span>重复规则</span><select name="repeat"><option value="none">不重复</option><option value="daily">每天</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="custom">自定义周期</option></select></label>
+          <label class="field"><span>重复间隔</span><input name="repeatInterval" type="number" min="1" value="1" /></label>
+          <label class="field"><span>自定义单位</span><select name="repeatUnit"><option value="day">天</option><option value="week">周</option><option value="month">月</option></select></label>
+          <label class="field"><span>提前提醒（分钟）</span><input name="reminderMinutes" type="number" min="0" value="10" /></label>
+          <label class="field wide"><span>备注</span><input name="notes" placeholder="补充说明（可选）" /></label>
+        </div>
+        <div class="form-actions"><button class="primary" type="submit">添加今日事项</button></div>
       </form>
     </section>
     <section class="panel">
@@ -761,6 +761,7 @@ app.addEventListener('submit', async (event) => {
 
 window.addEventListener('hashchange', render);
 render();
+
 
 
 
