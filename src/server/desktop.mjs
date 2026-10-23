@@ -1,5 +1,6 @@
 import { spawn, spawnSync } from 'node:child_process';
-import { appendFileSync, mkdirSync } from 'node:fs';
+import { appendFileSync, mkdirSync, writeFileSync } from 'node:fs';
+import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { listDueReminders, markReminderNotified, isDndNow } from '../core/reminders.mjs';
 import { localDateTimeString } from '../core/date.mjs';
@@ -47,7 +48,23 @@ export function setAutoStart(enabled, command) {
   return { enabled: Boolean(enabled) };
 }
 
-export class ReminderScheduler {
+
+export function overlaySignalPath() {
+  const base = process.env.LOCALAPPDATA || join(homedir(), 'AppData', 'Local');
+  return join(base, 'PersonalWorkLifeApp', 'show-overlay.signal');
+}
+
+export function requestOverlayShow({ launch = true } = {}) {
+  const signalPath = overlaySignalPath();
+  mkdirSync(join(signalPath, '..'), { recursive: true });
+  writeFileSync(signalPath, String(Date.now()), 'utf8');
+  if (launch && process.platform === 'win32') {
+    const helper = join(process.cwd(), 'scripts', 'desktop-helper.ps1');
+    const child = spawn('powershell.exe', ['-NoProfile', '-Sta', '-ExecutionPolicy', 'Bypass', '-File', helper, '-ApiBase', 'http://127.0.0.1:4123'], { detached: true, windowsHide: true, stdio: 'ignore' });
+    child.unref();
+  }
+  return { ok: true, signalPath };
+}export class ReminderScheduler {
   constructor(store, { intervalMs = 15000, notifier = notifyWindows, checkOnStart = true } = {}) {
     this.store = store;
     this.intervalMs = intervalMs;
@@ -110,4 +127,5 @@ export class ReminderScheduler {
     } catch {}
   }
 }
+
 

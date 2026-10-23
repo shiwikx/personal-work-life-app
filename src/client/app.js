@@ -492,7 +492,7 @@ async function renderSettings() {
   const lastBackup = settings.lastBackupAt ? `${settings.lastBackupAt} · ${settings.lastBackupStatus || '未知'}` : '尚未备份';
   const modules = ['today', 'thesis', 'study', 'development', 'autumn', 'work'];
   shell(`
-    ${pageHeader('数据与设置', '本地目录、提醒、备份恢复、自启动、悬浮窗和导出', '<button class="primary" data-action="manual-backup">立即备份</button>')}
+    ${pageHeader('数据与设置', '本地目录、提醒、备份恢复、自启动、悬浮窗和导出', '<div class="header-actions"><button class="ghost" data-action="open-overlay">打开悬浮窗</button><button class="primary" data-action="manual-backup">立即备份</button></div>')}
     <div class="stat-grid">
       <div class="stat-card accent"><span>当前数据目录</span><strong class="path-value">${escapeHtml(data.dataRoot)}</strong><small>${data.writable ? '目录可写，数据正常保存' : '目录不可写，请立即处理'}</small></div>
       <div class="stat-card"><span>最近备份</span><strong class="small-value">${escapeHtml(lastBackup)}</strong><small>备份数量 ${backups.length}</small></div>
@@ -565,6 +565,11 @@ app.addEventListener('click', async (event) => {
   const action = target.dataset.action;
   const id = target.dataset.id;
   try {
+    if (action === 'open-overlay') {
+      await api('/api/desktop/overlay', { method: 'POST', body: '{}' });
+      showNotice('已发送悬浮窗显示请求');
+      return;
+    }
     if (action === 'manual-backup') {
       await api('/api/backups/manual', { method: 'POST', body: '{}' });
       showNotice('备份已完成');
@@ -772,6 +777,8 @@ app.addEventListener('submit', async (event) => {
 
 window.addEventListener('hashchange', render);
 render();
+
+
 
 
 

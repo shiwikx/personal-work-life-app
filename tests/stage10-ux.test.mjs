@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -149,5 +149,32 @@ test('问题8：各模块添加表单默认折叠并可点击展开', { skip: !f
     assert.doesNotMatch(page.stdout, /<details class="add-form-disclosure" open/);
   } finally {
     await app.close(); rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('问题9：悬浮窗关闭后可从主页面或独立脚本重新打开', { skip: !findBrowser() }, async () => {
+  const root = mkdtempSync(join(tmpdir(), 'pwla-overlay-open-'));
+  const oldLocalAppData = process.env.LOCALAPPDATA;
+  process.env.LOCALAPPDATA = root;
+  const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0, scheduler: false, persistDataRoot: false, nativeActions: false });
+  const base = `http://127.0.0.1:${app.port}`;
+  try {
+    const response = await fetch(`${base}/api/desktop/overlay`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
+    assert.equal(response.status, 200);
+    const payload = await response.json();
+    assert.equal(payload.ok, true);
+    assert.ok(existsSync(payload.signalPath));
+    const page = await dumpDom(`${base}/#/settings`);
+    assert.equal(page.status, 0, page.stderr);
+    assert.match(page.stdout, /打开悬浮窗/);
+    const overlay = read('scripts/desktop-helper.ps1');
+    assert.match(overlay, /PersonalWorkLifeApp\.DesktopHelper/);
+    assert.match(overlay, /function Check-OverlaySignal/);
+    assert.match(overlay, /\$form\.Show\(\)/);
+    assert.ok(existsSync(join(process.cwd(), 'scripts', 'open-overlay.ps1')));
+  } finally {
+    await app.close();
+    if (oldLocalAppData === undefined) delete process.env.LOCALAPPDATA; else process.env.LOCALAPPDATA = oldLocalAppData;
+    rmSync(root, { recursive: true, force: true });
   }
 });

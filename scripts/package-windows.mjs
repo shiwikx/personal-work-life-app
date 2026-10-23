@@ -36,6 +36,11 @@ writeFileSync(join(workDir, '启动个人工作生活APP.cmd'), [
   'cd /d "%~dp0"',
   'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\\start-app.ps1"',
 ].join('\r\n'), 'utf8');
+writeFileSync(join(workDir, '打开悬浮窗.cmd'), [
+  '@echo off',
+  'cd /d "%~dp0"',
+  'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\\open-overlay.ps1"',
+].join('\r\n'), 'utf8');
 writeFileSync(join(workDir, '停止个人工作生活APP.cmd'), [
   '@echo off',
   'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\\stop-app.ps1"',
@@ -70,3 +75,4 @@ writeFileSync(output, createZip(files));
 console.log(`Windows 便携包已生成：${output}`);
 console.log(`体积：${(statSync(output).size / 1024 / 1024).toFixed(1)} MB`);
 console.log(`文件数：${files.length}`);
+

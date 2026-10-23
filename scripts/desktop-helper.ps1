@@ -6,6 +6,9 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 [System.Windows.Forms.Application]::EnableVisualStyles()
+$createdNew = $false
+$helperMutex = New-Object System.Threading.Mutex($true, "PersonalWorkLifeApp.DesktopHelper", [ref]$createdNew)
+if (-not $createdNew) { exit }
 
 $notify = New-Object System.Windows.Forms.NotifyIcon
 $notify.Icon = [System.Drawing.SystemIcons]::Application
@@ -225,7 +228,19 @@ function Refresh-StudyTimer {
     $studyTimer.Text = "学习计时 --:--:--"
   }
 }
-$seenReminders = @{}
+
+function Check-OverlaySignal {
+  try {
+    $base = if ($env:LOCALAPPDATA) { $env:LOCALAPPDATA } else { Join-Path $env:USERPROFILE "AppData\Local" }
+    $signalPath = Join-Path $base "PersonalWorkLifeApp\show-overlay.signal"
+    if (Test-Path -LiteralPath $signalPath) {
+      $form.Show()
+      $form.WindowState = [System.Windows.Forms.FormWindowState]::Normal
+      $form.Activate()
+      Remove-Item -LiteralPath $signalPath -Force -ErrorAction SilentlyContinue
+    }
+  } catch {}
+}$seenReminders = @{}
 function Show-DueReminders {
   try {
     $due = Invoke-RestMethod -Uri "$ApiBase/api/reminders/due?includeNotified=true&recentMinutes=10" -TimeoutSec 3
@@ -311,7 +326,7 @@ $timer.Add_Tick({ Refresh-Today; Show-DueReminders })
 $timer.Start()
 $clockTimer = New-Object System.Windows.Forms.Timer
 $clockTimer.Interval = 1000
-$clockTimer.Add_Tick({ Refresh-StudyTimer })
+$clockTimer.Add_Tick({ Refresh-StudyTimer; Check-OverlaySignal })
 $clockTimer.Start()
 
 Refresh-Today

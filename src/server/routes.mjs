@@ -13,7 +13,7 @@ import { listDueReminders, listUpcomingReminders, snoozeReminder } from '../core
 import { localDateTimeString as nowString } from '../core/date.mjs';
 import { createBackup, listBackups, restoreBackup } from '../core/backup.mjs';
 import { EXPORT_MODULES, createDataPackage, exportFilename, exportModuleCsv, exportModuleXls } from '../core/export.mjs';
-import { setAutoStart } from './desktop.mjs';
+import { requestOverlayShow, setAutoStart } from './desktop.mjs';
 import { writeBootstrapConfig } from './paths.mjs';
 import { accessSync, constants, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
@@ -384,6 +384,15 @@ export async function handleApi(req, res, url, store, sendJson, scheduler = null
     }
     return true;
   }
+  if (method === 'POST' && pathname === '/api/desktop/overlay') {
+    try {
+      const result = requestOverlayShow({ launch: options.nativeActions !== false });
+      sendJson(res, 200, result);
+    } catch (error) {
+      sendJson(res, 500, { error: error instanceof Error ? error.message : String(error) });
+    }
+    return true;
+  }
   if (method === 'GET' && pathname === '/api/health') {
     sendJson(res, 200, { ok: true, service: 'personal-work-life-app', now: localDateTimeString() });
     return true;
@@ -418,6 +427,7 @@ export async function readJson(req) {
 export function id(prefix = '') {
   return `${prefix}${randomUUID()}`;
 }
+
 
 
 
