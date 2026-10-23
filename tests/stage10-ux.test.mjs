@@ -73,3 +73,13 @@ test('问题4：今日事项添加表单使用多行可见字段', { skip: !find
     await app.close(); rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('问题5：悬浮窗显示并实时刷新学习计时', () => {
+  const overlay = read('scripts/desktop-helper.ps1');
+  assert.match(overlay, /\$studyTimer\.Text = "学习计时 --:--:--"/);
+  assert.match(overlay, /\/api\/timer\/study/);
+  assert.match(overlay, /function Refresh-StudyTimer/);
+  assert.match(overlay, /\$clockTimer\.Interval = 1000/);
+  assert.match(overlay, /Start-Process "\$ApiBase\/#\/study"/);
+  assert.equal((overlay.match(/function Refresh-StudyTimer/g) || []).length, 1);
+});

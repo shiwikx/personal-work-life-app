@@ -16,8 +16,8 @@ $form = New-Object System.Windows.Forms.Form
 $form.Text = "今日未完成事项"
 $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::None
 $form.StartPosition = [System.Windows.Forms.FormStartPosition]::Manual
-$form.Size = New-Object System.Drawing.Size(370, 540)
-$form.MinimumSize = New-Object System.Drawing.Size(300, 56)
+$form.Size = New-Object System.Drawing.Size(370, 560)
+$form.MinimumSize = New-Object System.Drawing.Size(300, 72)
 $form.TopMost = $true
 $form.ShowInTaskbar = $false
 $form.Opacity = 0.94`r`n$form.BackColor = [System.Drawing.Color]::FromArgb(250, 252, 249)
@@ -26,7 +26,7 @@ $form.Location = New-Object System.Drawing.Point(($screen.Right - 386), ($screen
 
 $header = New-Object System.Windows.Forms.Panel
 $header.Dock = [System.Windows.Forms.DockStyle]::Top
-$header.Height = 54
+$header.Height = 72
 $header.BackColor = [System.Drawing.Color]::FromArgb(238, 29, 40, 35)
 $form.Controls.Add($header)
 
@@ -35,16 +35,26 @@ $title.Text = "今日未完成"
 $title.ForeColor = [System.Drawing.Color]::White
 $title.Font = New-Object System.Drawing.Font("Microsoft YaHei UI", 11, [System.Drawing.FontStyle]::Bold)
 $title.AutoSize = $false
-$title.Location = New-Object System.Drawing.Point(16, 16)
+$title.Location = New-Object System.Drawing.Point(16, 9)
 $title.Size = New-Object System.Drawing.Size(220, 24)
 $header.Controls.Add($title)
+
+$studyTimer = New-Object System.Windows.Forms.Label
+$studyTimer.Text = "学习计时 --:--:--"
+$studyTimer.ForeColor = [System.Drawing.Color]::FromArgb(190, 220, 204)
+$studyTimer.Font = New-Object System.Drawing.Font("Consolas", 10, [System.Drawing.FontStyle]::Regular)
+$studyTimer.Location = New-Object System.Drawing.Point(16, 35)
+$studyTimer.Size = New-Object System.Drawing.Size(240, 22)
+$studyTimer.Cursor = [System.Windows.Forms.Cursors]::Hand
+$studyTimer.Add_Click({ Start-Process "$ApiBase/#/study" })
+$header.Controls.Add($studyTimer)
 
 $collapse = New-Object System.Windows.Forms.Button
 $collapse.Text = "—"
 $collapse.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
 $collapse.ForeColor = [System.Drawing.Color]::White
 $collapse.BackColor = [System.Drawing.Color]::FromArgb(29, 40, 35)
-$collapse.Location = New-Object System.Drawing.Point(276, 11)
+$collapse.Location = New-Object System.Drawing.Point(276, 18)
 $collapse.Size = New-Object System.Drawing.Size(34, 32)
 $collapse.FlatAppearance.BorderSize = 0
 $header.Controls.Add($collapse)
@@ -54,7 +64,7 @@ $hide.Text = "×"
 $hide.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
 $hide.ForeColor = [System.Drawing.Color]::White
 $hide.BackColor = [System.Drawing.Color]::FromArgb(29, 40, 35)
-$hide.Location = New-Object System.Drawing.Point(316, 11)
+$hide.Location = New-Object System.Drawing.Point(316, 18)
 $hide.Size = New-Object System.Drawing.Size(34, 32)
 $hide.FlatAppearance.BorderSize = 0
 $header.Controls.Add($hide)
@@ -94,7 +104,7 @@ $resizeGrip.Add_MouseMove({
 })
 $resizeGrip.Add_MouseUp({ $script:resizeStart = $null })
 
-$expandedHeight = 540
+$expandedHeight = 560
 $dragPoint = New-Object System.Drawing.Point(0, 0)
 $header.Add_MouseDown({ param($sender, $event) $script:dragPoint = $event.Location })
 $header.Add_MouseMove({
@@ -109,7 +119,7 @@ $collapse.Add_Click({
   if ($form.Height -gt 80) {
     $script:expandedHeight = $form.Height
     $list.Visible = $false
-    $form.Height = 54
+    $form.Height = 72
     $collapse.Text = "□"
   } else {
     $form.Height = $script:expandedHeight
@@ -197,6 +207,24 @@ $exitItem.Add_Click({ $notify.Visible = $false; $notify.Dispose(); [System.Windo
 $notify.ContextMenuStrip = $menu
 $notify.Add_DoubleClick({ $form.Show(); $form.Activate() })
 
+
+function Refresh-StudyTimer {
+  try {
+    $data = Invoke-RestMethod -Uri "$ApiBase/api/timer/study" -TimeoutSec 2
+    $seconds = [Math]::Max(0, [int]$data.elapsedSeconds)
+    if ($data.timer -and $data.timer.running -and $data.timer.startedAt) {
+      $started = [datetime]::Parse($data.timer.startedAt)
+      $seconds += [Math]::Max(0, [int]((Get-Date) - $started).TotalSeconds)
+    }
+    $hours = [int]([Math]::Floor($seconds / 3600))
+    $minutes = [int]([Math]::Floor(($seconds % 3600) / 60))
+    $remain = [int]($seconds % 60)
+    $state = if ($data.timer -and $data.timer.running) { "运行中" } elseif ($seconds -gt 0) { "已暂停" } else { "未开始" }
+    $studyTimer.Text = "学习计时 {0:D2}:{1:D2}:{2:D2} · $state" -f $hours, $minutes, $remain
+  } catch {
+    $studyTimer.Text = "学习计时 --:--:--"
+  }
+}
 $seenReminders = @{}
 function Show-DueReminders {
   try {
@@ -281,6 +309,10 @@ $timer = New-Object System.Windows.Forms.Timer
 $timer.Interval = 10000
 $timer.Add_Tick({ Refresh-Today; Show-DueReminders })
 $timer.Start()
+$clockTimer = New-Object System.Windows.Forms.Timer
+$clockTimer.Interval = 1000
+$clockTimer.Add_Tick({ Refresh-StudyTimer })
+$clockTimer.Start()
 
 Refresh-Today
 [System.Windows.Forms.Application]::Run($form)
