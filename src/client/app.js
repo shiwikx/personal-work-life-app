@@ -477,7 +477,8 @@ async function renderModulePage(route) {
         const sectionItems = byType.get(section.type);
         const activeItems = sectionItems.filter((item) => !['completed', 'done', 'closed'].includes(item.status));
         const archivedItems = sectionItems.filter((item) => ['completed', 'done', 'closed'].includes(item.status));
-        return `<section class="panel"><div class="panel-head"><div><p class="eyebrow">${escapeHtml(section.title)}</p><h2>${escapeHtml(section.title)}</h2></div><span class="count">${sectionItems.length} 条</span></div>${renderEntityForm(section, route, sectionItems, data.items)}<div class="entity-list">${activeItems.map((item) => moduleEntityCard(item, section, route)).join('') || '<div class="empty">暂无待处理记录</div>'}</div>${archivedItems.length ? `<details class="completed-archive"><summary>已完成存档 · ${archivedItems.length} 条</summary><div class="entity-list archived-list">${archivedItems.map((item) => moduleEntityCard(item, section, route)).join('')}</div></details>` : ''}</section>`;
+        const editingSection = state.editing?.module === route && state.editing?.type === section.type;
+        return `<section class="panel"><div class="panel-head"><div><p class="eyebrow">${escapeHtml(section.title)}</p><h2>${escapeHtml(section.title)}</h2></div><span class="count">${sectionItems.length} 条</span></div><details class="add-form-disclosure" ${editingSection ? 'open' : ''}><summary>+ 添加${escapeHtml(section.title)}</summary>${renderEntityForm(section, route, sectionItems, data.items)}</details><div class="entity-list">${activeItems.map((item) => moduleEntityCard(item, section, route)).join('') || '<div class="empty">暂无待处理记录</div>'}</div>${archivedItems.length ? `<details class="completed-archive"><summary>已完成存档 · ${archivedItems.length} 条</summary><div class="entity-list archived-list">${archivedItems.map((item) => moduleEntityCard(item, section, route)).join('')}</div></details>` : ''}</section>`;
       }).join('')}
     </div>
   `;
@@ -771,6 +772,7 @@ app.addEventListener('submit', async (event) => {
 
 window.addEventListener('hashchange', render);
 render();
+
 
 
 

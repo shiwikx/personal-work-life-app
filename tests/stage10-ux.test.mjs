@@ -133,3 +133,21 @@ test('问题7：新增笔试或面试安排后下一场自动更新', { skip: !f
     await app.close(); rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('问题8：各模块添加表单默认折叠并可点击展开', { skip: !findBrowser() }, async () => {
+  const root = mkdtempSync(join(tmpdir(), 'pwla-collapsible-'));
+  const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0, scheduler: false, persistDataRoot: false, nativeActions: false });
+  const base = `http://127.0.0.1:${app.port}`;
+  try {
+    const page = await dumpDom(`${base}/#/study`);
+    assert.equal(page.status, 0, page.stderr);
+    assert.match(page.stdout, /class="add-form-disclosure"/);
+    assert.match(page.stdout, /\+ 添加课程与学习资料/);
+    assert.match(page.stdout, /\+ 添加章节目标/);
+    assert.match(page.stdout, /\+ 添加复习安排/);
+    assert.match(page.stdout, /\+ 添加学习笔记/);
+    assert.doesNotMatch(page.stdout, /<details class="add-form-disclosure" open/);
+  } finally {
+    await app.close(); rmSync(root, { recursive: true, force: true });
+  }
+});
