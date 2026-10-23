@@ -89,6 +89,7 @@ export function manualDevelopmentTime(store, input) {
 export function autumnSummary(store, today = localDateString()) {
   const items = store.listEntities({ module: 'autumn' });
   const applications = items.filter((item) => item.type === 'autumn_application');
+  const events = items.filter((item) => item.type === 'autumn_event');
   const upcoming = [];
   for (const application of applications) {
     for (const kind of ['exam', 'interview']) {
@@ -104,8 +105,25 @@ export function autumnSummary(store, today = localDateString()) {
         at,
         date,
         status: application.payload?.applicationStatus || application.status,
+        source: 'application',
       });
     }
+  }
+  for (const event of events) {
+    if (!event.date || event.status === 'completed') continue;
+    const kind = event.payload?.eventType === 'interview' ? 'interview' : 'exam';
+    const at = `${event.date}T${event.scheduledTime || '09:00'}`;
+    if (event.date < today) continue;
+    upcoming.push({
+      id: event.id,
+      eventId: event.id,
+      kind,
+      title: event.title,
+      at,
+      date: event.date,
+      status: event.status,
+      source: 'event',
+    });
   }
   upcoming.sort((a, b) => a.at.localeCompare(b.at));
   return {
@@ -121,3 +139,4 @@ export function autumnSummary(store, today = localDateString()) {
     nextDate: upcoming[0]?.date || addDays(today, 1),
   };
 }
+

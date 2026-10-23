@@ -88,6 +88,11 @@ const MODULE_CONFIGS = {
       { type: 'autumn_task', title: '每日秋招事项', showTime: true, showReminder: true, showRecurrence: true, showPriority: true, fields: [
         { key: 'category', label: '事项类型', payload: true, placeholder: '例如：刷题 / 改简历 / 复盘' },
       ], cardFields: [['category', '类型']] },
+      { type: 'autumn_event', title: '笔试/面试安排', showTime: true, showReminder: true, fields: [
+        { key: 'eventType', label: '安排类型', type: 'select', options: [{ value: 'exam', label: '笔试' }, { value: 'interview', label: '面试' }], payload: true },
+        { key: 'format', label: '形式或说明', payload: true, placeholder: '线上 / 线下 / 链接说明' },
+        { key: 'notes', label: '备注', type: 'textarea', payload: true },
+      ], cardFields: [['eventType', '类型'], ['format', '形式']] },
       { type: 'autumn_application', title: '投递记录', showSchedule: true, fields: [
         { key: 'applicationStatus', label: '当前状态', type: 'select', options: [{ value: 'preparing', label: '准备投递' }, { value: 'submitted', label: '已投递' }, { value: 'written', label: '笔试中' }, { value: 'interview', label: '面试中' }, { value: 'offer', label: '已录用' }, { value: 'closed', label: '已结束' }], payload: true },
         { key: 'examAt', label: '笔试时间', type: 'datetime-local', payload: true },
@@ -766,6 +771,7 @@ app.addEventListener('submit', async (event) => {
 
 window.addEventListener('hashchange', render);
 render();
+
 
 
 

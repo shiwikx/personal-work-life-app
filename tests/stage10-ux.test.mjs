@@ -107,3 +107,29 @@ test('问题6：首页返回并展示总进度条', { skip: !findBrowser() }, as
   }
 });
 
+
+test('问题7：新增笔试或面试安排后下一场自动更新', { skip: !findBrowser() }, async () => {
+  const root = mkdtempSync(join(tmpdir(), 'pwla-autumn-next-'));
+  const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0, scheduler: false, persistDataRoot: false, nativeActions: false });
+  const base = `http://127.0.0.1:${app.port}`;
+  try {
+    await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ module: 'autumn', type: 'autumn_application', title: '投递 A', date: '2026-10-23', payload: { examAt: '2026-10-28T09:00' } }) });
+    let summary = await fetch(`${base}/api/autumn/summary?date=2026-10-23`).then((response) => response.json());
+    assert.equal(summary.nextExamOrInterview.at, '2026-10-28T09:00');
+    await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ module: 'autumn', type: 'autumn_event', title: '新增笔试', date: '2026-10-24', scheduledTime: '14:00', payload: { eventType: 'exam', format: '线上' } }) });
+    summary = await fetch(`${base}/api/autumn/summary?date=2026-10-23`).then((response) => response.json());
+    assert.equal(summary.nextExamOrInterview.title, '新增笔试');
+    assert.equal(summary.nextExamOrInterview.at, '2026-10-24T14:00');
+    await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ module: 'autumn', type: 'autumn_event', title: '更早面试', date: '2026-10-23', scheduledTime: '18:00', payload: { eventType: 'interview' } }) });
+    summary = await fetch(`${base}/api/autumn/summary?date=2026-10-23`).then((response) => response.json());
+    assert.equal(summary.nextExamOrInterview.title, '更早面试');
+    assert.equal(summary.nextExamOrInterview.kind, 'interview');
+    const page = await dumpDom(`${base}/#/autumn`);
+    assert.equal(page.status, 0, page.stderr);
+    assert.match(page.stdout, /笔试\/面试安排/);
+    assert.match(page.stdout, /更早面试/);
+    assert.match(page.stdout, /2026-10-23 18:00/);
+  } finally {
+    await app.close(); rmSync(root, { recursive: true, force: true });
+  }
+});
