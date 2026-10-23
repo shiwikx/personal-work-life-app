@@ -463,7 +463,12 @@ async function renderModulePage(route) {
     ${renderTimer(route, data.items)}
     ${await renderModuleInsights(route, data.items)}
     <div class="section-stack">
-      ${config.sections.map((section) => `<section class="panel"><div class="panel-head"><div><p class="eyebrow">${escapeHtml(section.title)}</p><h2>${escapeHtml(section.title)}</h2></div><span class="count">${byType.get(section.type).length} 条</span></div>${renderEntityForm(section, route, byType.get(section.type), data.items)}<div class="entity-list">${byType.get(section.type).map((item) => moduleEntityCard(item, section, route)).join('') || '<div class="empty">暂无记录</div>'}</div></section>`).join('')}
+      ${config.sections.map((section) => {
+        const sectionItems = byType.get(section.type);
+        const activeItems = sectionItems.filter((item) => !['completed', 'done', 'closed'].includes(item.status));
+        const archivedItems = sectionItems.filter((item) => ['completed', 'done', 'closed'].includes(item.status));
+        return `<section class="panel"><div class="panel-head"><div><p class="eyebrow">${escapeHtml(section.title)}</p><h2>${escapeHtml(section.title)}</h2></div><span class="count">${sectionItems.length} 条</span></div>${renderEntityForm(section, route, sectionItems, data.items)}<div class="entity-list">${activeItems.map((item) => moduleEntityCard(item, section, route)).join('') || '<div class="empty">暂无待处理记录</div>'}</div>${archivedItems.length ? `<details class="completed-archive"><summary>已完成存档 · ${archivedItems.length} 条</summary><div class="entity-list archived-list">${archivedItems.map((item) => moduleEntityCard(item, section, route)).join('')}</div></details>` : ''}</section>`;
+      }).join('')}
     </div>
   `;
   shell(content);
@@ -756,6 +761,7 @@ app.addEventListener('submit', async (event) => {
 
 window.addEventListener('hashchange', render);
 render();
+
 
 
 

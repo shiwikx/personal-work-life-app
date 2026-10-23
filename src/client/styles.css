@@ -173,3 +173,6 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .priority-medium { background: #f7edd2; color: #80611d; }
 .priority-high { background: #f5ddcf; color: #8a4529; }
 .priority-critical { background: #f3d2ce; color: #952f2a; }
+.completed-archive { margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 12px; }
+.completed-archive summary { cursor: pointer; color: var(--muted); font-size: 13px; font-weight: 700; padding: 7px 2px; }
+.archived-list { margin-top: 9px; opacity: .78; }

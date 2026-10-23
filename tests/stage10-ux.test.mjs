@@ -36,3 +36,20 @@ test('问题2：优先级使用普通、低、中、高、紧急五级明确标�
     await app.close(); rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('问题3：完成事项在所属模块进入已完成存档', { skip: !findBrowser() }, async () => {
+  const root = mkdtempSync(join(tmpdir(), 'pwla-archive-'));
+  const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0, scheduler: false, persistDataRoot: false, nativeActions: false });
+  const base = `http://127.0.0.1:${app.port}`;
+  try {
+    const created = await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ module: 'study', type: 'study_review', title: '已完成的复习任务', date: '2026-10-23' }) }).then((response) => response.json());
+    await fetch(`${base}/api/entities/${created.item.id}/complete`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ date: '2026-10-23' }) });
+    const page = await dumpDom(`${base}/#/study`);
+    assert.equal(page.status, 0, page.stderr);
+    assert.match(page.stdout, /已完成存档 · 1 条/);
+    assert.match(page.stdout, /已完成的复习任务/);
+    assert.match(page.stdout, /class="completed-archive"/);
+  } finally {
+    await app.close(); rmSync(root, { recursive: true, force: true });
+  }
+});
