@@ -1,0 +1,17 @@
+node_modules/
+dist/
+dist-electron/
+dist-server/
+release/
+data-test/
+playwright-report/
+test-results/
+*.log
+.pnpm-store/
+data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+backups/
+exports/
+logs/

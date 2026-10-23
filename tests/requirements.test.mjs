@@ -1,0 +1,40 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import test from 'node:test';
+
+const root = resolve(process.cwd());
+const read = (file) => readFileSync(resolve(root, file), 'utf8');
+
+test('PRD 保留全部十个必需章节', () => {
+  const prd = read('PRD.md');
+  const headings = [
+    '## 1. 产品目标和使用场景',
+    '## 2. 整体页面框架和导航结构',
+    '## 3. 首页的内容结构',
+    '## 4. 每个模块的用途',
+    '## 5. 每个模块第一版最必要的数据和操作',
+    '## 6. 首页、今日计划和各模块之间的关系',
+    '## 7. 本地数据文件、备份和恢复要求',
+    '## 8. 第一版必须完成的功能',
+    '## 9. 第一版暂时不做的功能',
+    '## 10. 可以实际检查的验收标准',
+  ];
+  for (const heading of headings) assert.ok(prd.includes(heading), heading);
+});
+
+test('开发计划包含阶段 0 到阶段 9', () => {
+  const plan = read('DEVELOPMENT_PLAN.md');
+  for (let phase = 0; phase <= 9; phase += 1) {
+    assert.ok(plan.includes(`## 阶段 ${phase}：`), `阶段 ${phase}`);
+  }
+});
+
+test('路由基线只包含确认的八个模块', () => {
+  const routes = read('docs/routes.md');
+  const confirmed = ['首页总览', '今日计划', '毕设论文', '学习计划', '开发计划', '秋招每日计划', '工作计划', '数据与设置'];
+  for (const name of confirmed) assert.ok(routes.includes(name), name);
+  for (const removed of ['自媒体', '健身计划', '饮食计划', '游戏娱乐']) {
+    assert.ok(!routes.includes(removed), removed);
+  }
+});
