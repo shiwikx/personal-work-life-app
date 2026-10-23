@@ -67,10 +67,10 @@ const MODULE_CONFIGS = {
       { type: 'dev_project', title: '项目', fields: [
         { key: 'description', label: '项目说明', type: 'textarea', payload: true },
       ], cardFields: [['description', '说明']] },
-      { type: 'dev_feature', title: '功能拆分', parentType: 'dev_project', showSchedule: true, fields: [
+      { type: 'dev_feature', title: '功能拆分', parentType: 'dev_project', showSchedule: true, showPriority: true, fields: [
         { key: 'description', label: '功能说明', type: 'textarea', payload: true },
       ], cardFields: [['description', '说明']] },
-      { type: 'dev_defect', title: '缺陷清单', parentType: 'dev_project', showSchedule: false, fields: [
+      { type: 'dev_defect', title: '缺陷清单', parentType: 'dev_project', showSchedule: false, showPriority: true, fields: [
         { key: 'severity', label: '严重程度', type: 'select', options: [{ value: 'low', label: '低' }, { value: 'medium', label: '中' }, { value: 'high', label: '高' }, { value: 'critical', label: '严重' }], payload: true },
         { key: 'repro', label: '复现说明', type: 'textarea', payload: true },
         { key: 'resolution', label: '处理备注', type: 'textarea', payload: true },
@@ -85,7 +85,7 @@ const MODULE_CONFIGS = {
   autumn: {
     title: '秋招每日计划', subtitle: '自定义每日事项、投递状态、笔试面试安排与面试复盘',
     sections: [
-      { type: 'autumn_task', title: '每日秋招事项', showTime: true, showReminder: true, showRecurrence: true, fields: [
+      { type: 'autumn_task', title: '每日秋招事项', showTime: true, showReminder: true, showRecurrence: true, showPriority: true, fields: [
         { key: 'category', label: '事项类型', payload: true, placeholder: '例如：刷题 / 改简历 / 复盘' },
       ], cardFields: [['category', '类型']] },
       { type: 'autumn_application', title: '投递记录', showSchedule: true, fields: [
@@ -101,7 +101,7 @@ const MODULE_CONFIGS = {
   work: {
     title: '工作计划', subtitle: '任务优先级、会议、进展、日志与日报周报',
     sections: [
-      { type: 'work_task', title: '工作任务', showTime: true, showReminder: true, showRecurrence: true, fields: [
+      { type: 'work_task', title: '工作任务', showTime: true, showReminder: true, showRecurrence: true, showPriority: true, fields: [
         { key: 'project', label: '所属项目', payload: true, placeholder: '填写项目或工作流名称' },
         { key: 'description', label: '任务说明', type: 'textarea', payload: true },
         { key: 'nextStep', label: '下一步', payload: true },
@@ -135,6 +135,21 @@ const state = {
   notice: null,
 };
 
+const PRIORITY_LEVELS = {
+  0: { label: '普通', className: 'priority-normal' },
+  1: { label: '低', className: 'priority-low' },
+  2: { label: '中', className: 'priority-medium' },
+  3: { label: '高', className: 'priority-high' },
+  4: { label: '紧急', className: 'priority-critical' },
+};
+
+function priorityInfo(priority) {
+  return PRIORITY_LEVELS[Number(priority) || 0] || PRIORITY_LEVELS[0];
+}
+
+function priorityOptions(selected = 0) {
+  return Object.entries(PRIORITY_LEVELS).map(([value, level]) => `<option value="${value}" ${Number(selected) === Number(value) ? 'selected' : ''}>${value === '0' ? level.label : `P${value} · ${level.label}`}</option>`).join('');
+}
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 }
@@ -209,7 +224,7 @@ function taskRow(item, options = {}) {
       <div class="task-body">
         <div class="task-title-line">
           <strong>${escapeHtml(item.title)}</strong>
-          ${item.priority > 0 ? `<span class="pill priority">P${item.priority}</span>` : ''}
+          ${item.priority > 0 ? `<span class="pill priority ${priorityInfo(item.priority).className}">P${item.priority} · ${priorityInfo(item.priority).label}</span>` : '<span class="pill priority priority-normal">普通</span>'}
           ${item.scheduledTime ? `<span class="pill">${escapeHtml(item.scheduledTime)}</span>` : ''}
           ${showDate && item.date ? `<span class="pill">${escapeHtml(item.date)}</span>` : ''}
         </div>
@@ -303,7 +318,7 @@ async function renderToday() {
       <form class="task-form" data-form="today-task">
         <input name="title" placeholder="要做什么？" required />
         <input name="scheduledTime" type="time" />
-        <select name="priority"><option value="0">普通优先级</option><option value="1">P1</option><option value="2">P2</option><option value="3">P3</option></select>
+        <select name="priority" title="优先级">${priorityOptions(0)}</select>
         <select name="repeat">
           <option value="none">不重复</option><option value="daily">每天</option><option value="weekly">每周</option><option value="monthly">每月</option><option value="custom">自定义周期</option>
         </select>
@@ -348,7 +363,7 @@ function renderEntityForm(section, module, entities, allEntities = []) {
         ${[['todo','待处理'],['doing','进行中'],['completed','已完成'],['blocked','受阻']].map(([value,label]) => `<option value="${value}" ${editing?.status === value ? 'selected' : ''}>${label}</option>`).join('')}
       </select></label>
       ${section.schedule === false ? '' : `<label class="field"><span>日期</span><input name="date" type="date" value="${escapeHtml(editing?.date || state.selectedDate)}" /></label>`}
-      ${section.showTime ? `<label class="field"><span>时间</span><input name="scheduledTime" type="time" value="${escapeHtml(editing?.scheduledTime || '')}" /></label>` : ''}      ${section.parentType ? `<label class="field"><span>所属项目</span><select name="parentId"><option value="">不关联</option>${allEntities.filter((item) => item.type === section.parentType).map((item) => `<option value="${item.id}" ${editing?.parentId === item.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label>` : ''}
+      ${section.showTime ? `<label class="field"><span>时间</span><input name="scheduledTime" type="time" value="${escapeHtml(editing?.scheduledTime || '')}" /></label>` : ''}      ${section.showPriority ? `<label class="field"><span>优先级</span><select name="priority">${priorityOptions(editing?.priority || 0)}</select></label>` : ''}      ${section.parentType ? `<label class="field"><span>所属项目</span><select name="parentId"><option value="">不关联</option>${allEntities.filter((item) => item.type === section.parentType).map((item) => `<option value="${item.id}" ${editing?.parentId === item.id ? 'selected' : ''}>${escapeHtml(item.title)}</option>`).join('')}</select></label>` : ''}
       ${section.showReminder ? `<label class="field"><span>提前提醒（分钟）</span><input name="reminderMinutes" type="number" min="0" value="${editing?.reminderMinutes ?? 10}" /></label>` : ''}
       ${section.showRecurrence ? `<label class="field"><span>重复</span><select name="recurrenceFreq">${[['none','不重复'],['daily','每天'],['weekly','每周'],['monthly','每月'],['custom','自定义周期']].map(([value,label]) => `<option value="${value}" ${recurrenceFreq === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>` : ''}      ${section.showRecurrence ? `<label class="field"><span>重复间隔</span><input name="recurrenceInterval" type="number" min="1" value="${editing?.recurrence?.interval || 1}" /></label><label class="field"><span>自定义单位</span><select name="customUnit">${[['day','天'],['week','周'],['month','月']].map(([value,label]) => `<option value="${value}" ${editing?.recurrence?.unit === value ? 'selected' : ''}>${label}</option>`).join('')}</select></label>` : ''}
       ${(section.fields || []).map((field) => renderField(field, editing)).join('')}
@@ -680,6 +695,7 @@ app.addEventListener('submit', async (event) => {
         manualProgress: formData.get('manualProgress') === '' ? null : Number(formData.get('manualProgress')),
         progressNote: String(formData.get('progressNote') || ''),
         parentId: formData.get('parentId') || null,
+        priority: Number(formData.get('priority') || 0),
         recurrence: freq === 'none' ? { freq: 'none' } : { freq, interval: Number(formData.get('recurrenceInterval') || 1), unit: String(formData.get('customUnit') || 'day') },
         payload: entityId && state.editing ? { ...(state.editing.payload || {}), ...payload } : payload,
       };
@@ -740,6 +756,7 @@ app.addEventListener('submit', async (event) => {
 
 window.addEventListener('hashchange', render);
 render();
+
 
 
 
