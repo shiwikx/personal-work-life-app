@@ -259,6 +259,11 @@ async function renderHome() {
       <div class="stat-card"><span>最近自动备份</span><strong class="small-value">${data.backup.lastBackupAt ? escapeHtml(data.backup.lastBackupAt) : '尚未备份'}</strong><small>${data.backup.lastBackupStatus || (data.backup.autoBackup ? '等待首次备份' : '自动备份已关闭')}</small></div>
       <div class="stat-card"><span>快速备忘</span><strong>${data.memos.length}</strong><small>条备忘</small></div>
     </section>
+    <section class="panel overall-progress-panel">
+      <div class="panel-head"><div><p class="eyebrow">OVERALL PROGRESS</p><h2>总进度</h2></div><strong class="overall-percent">${data.overallProgress.percent}%</strong></div>
+      <div class="progress-bar overall-progress-bar"><i style="width:${Math.max(0, Math.min(100, data.overallProgress.percent))}%"></i></div>
+      <p class="hint">已完成 ${data.overallProgress.completed} / ${data.overallProgress.total} 项可执行记录，手动进度和完成状态均计入总进度。</p>
+    </section>
     <section class="content-grid">
       <div class="panel wide">
         <div class="panel-head"><div><p class="eyebrow">TODAY</p><h2>今日计划摘要</h2></div><span class="count">${data.today.length}</span></div>
@@ -761,6 +766,7 @@ app.addEventListener('submit', async (event) => {
 
 window.addEventListener('hashchange', render);
 render();
+
 
 
 

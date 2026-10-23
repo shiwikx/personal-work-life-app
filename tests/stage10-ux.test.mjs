@@ -83,3 +83,27 @@ test('问题5：悬浮窗显示并实时刷新学习计时', () => {
   assert.match(overlay, /Start-Process "\$ApiBase\/#\/study"/);
   assert.equal((overlay.match(/function Refresh-StudyTimer/g) || []).length, 1);
 });
+
+test('问题6：首页返回并展示总进度条', { skip: !findBrowser() }, async () => {
+  const root = mkdtempSync(join(tmpdir(), 'pwla-overall-'));
+  const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0, scheduler: false, persistDataRoot: false, nativeActions: false });
+  const base = `http://127.0.0.1:${app.port}`;
+  try {
+    const first = await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ module: 'today', type: 'task', title: '完成项', date: '2026-10-23' }) }).then((response) => response.json());
+    const second = await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ module: 'today', type: 'task', title: '半进度项', date: '2026-10-23' }) }).then((response) => response.json());
+    await fetch(`${base}/api/entities/${first.item.id}/complete`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ date: '2026-10-23' }) });
+    await fetch(`${base}/api/entities/${second.item.id}/progress`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ manualProgress: 50 }) });
+    const home = await fetch(`${base}/api/home?date=2026-10-23`).then((response) => response.json());
+    assert.equal(home.overallProgress.percent, 75);
+    assert.equal(home.overallProgress.total, 2);
+    assert.equal(home.overallProgress.completed, 1);
+    const page = await dumpDom(`${base}/#/`);
+    assert.equal(page.status, 0, page.stderr);
+    assert.match(page.stdout, /总进度/);
+    assert.match(page.stdout, /overall-progress-bar/);
+    assert.match(page.stdout, /75%/);
+  } finally {
+    await app.close(); rmSync(root, { recursive: true, force: true });
+  }
+});
+

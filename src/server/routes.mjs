@@ -202,6 +202,16 @@ export async function handleApi(req, res, url, store, sendJson, scheduler = null
     summary.study.detail = `今日学习 ${studyMinutes} 分钟 · ${summary.study.open} 项待处理`;
     const workTasks = all.filter((item) => item.module === 'work' && item.type === 'work_task' && item.status !== 'completed').sort((a, b) => b.priority - a.priority);
     summary.work.detail = workTasks[0] ? `最高优先级 P${workTasks[0].priority || 0} · ${workTasks[0].title}` : '当前没有待处理工作任务';
+    const progressItems = all.filter((item) => !['study_session', 'dev_time_entry', 'work_log', 'work_report'].includes(item.type));
+    const progressValues = progressItems.map((item) => {
+      if (['completed', 'done', 'closed'].includes(item.status)) return 100;
+      return item.manualProgress === null || item.manualProgress === undefined ? 0 : Math.max(0, Math.min(100, Number(item.manualProgress)));
+    });
+    const overallProgress = {
+      percent: progressValues.length ? Math.round(progressValues.reduce((sum, value) => sum + value, 0) / progressValues.length) : 0,
+      total: progressValues.length,
+      completed: progressItems.filter((item) => ['completed', 'done', 'closed'].includes(item.status)).length,
+    };
     const settings = store.getSettings();
     sendJson(res, 200, {
       date,
@@ -211,6 +221,7 @@ export async function handleApi(req, res, url, store, sendJson, scheduler = null
       memos: store.listMemos(),
       nextReminder: listUpcomingReminders(store, new Date(`${date}T00:00:00`), { days: 30 })[0] || null,
       backup: { lastBackupAt: settings.lastBackupAt || '', lastBackupStatus: settings.lastBackupStatus || '', autoBackup: settings.autoBackup !== false },
+      overallProgress,
     });
     return true;
   }
@@ -407,6 +418,7 @@ export async function readJson(req) {
 export function id(prefix = '') {
   return `${prefix}${randomUUID()}`;
 }
+
 
 
 

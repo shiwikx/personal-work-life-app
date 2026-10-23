@@ -181,3 +181,7 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .today-task-grid .field.wide { grid-column: span 2; }
 @media (max-width: 900px) { .today-task-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 620px) { .today-task-grid { grid-template-columns: 1fr; } .today-task-grid .field.wide { grid-column: auto; } }
+.overall-progress-panel { margin-bottom: 18px; background: linear-gradient(135deg, rgba(250,252,249,.97), rgba(232,241,235,.92)); }
+.overall-percent { font-size: 28px; color: var(--accent-dark); letter-spacing: -.03em; }
+.overall-progress-bar { height: 13px; margin: 3px 0 8px; }
+.overall-progress-bar i { background: linear-gradient(90deg, #4d8f78, #80b89f); }
