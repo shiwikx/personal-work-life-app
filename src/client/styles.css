@@ -155,3 +155,16 @@ a.ghost { text-decoration: none; color: var(--ink); }
 @media (max-width: 900px) { .report-generator-grid, .settings-form, .export-grid { grid-template-columns: 1fr; } .backup-row { grid-template-columns: 1fr auto; } }
 .home-stats { grid-template-columns: 1.2fr 1.2fr 1fr .7fr; }
 @media (max-width: 1100px) { .home-stats { grid-template-columns: 1fr 1fr; } }
+
+/* Visual polish */
+body { background: radial-gradient(circle at 12% -8%, rgba(162, 196, 178, .28), transparent 34%), radial-gradient(circle at 88% 2%, rgba(220, 234, 225, .55), transparent 30%), linear-gradient(145deg, #f1f0ea 0%, #ebeae3 100%); }
+.panel, .module-card, .stat-card { border-color: rgba(204, 199, 187, .76); box-shadow: 0 16px 42px rgba(34, 46, 39, .075), 0 2px 8px rgba(34, 46, 39, .035); }
+.panel { background: rgba(255, 254, 250, .88); backdrop-filter: blur(12px); }
+.page-header { padding-bottom: 4px; }
+.task-row { transition: background .16s ease, border-color .16s ease, transform .16s ease; }
+.task-row:hover { background: #fff; transform: translateY(-1px); }
+.module-card { background: linear-gradient(145deg, rgba(255,254,250,.96), rgba(248,246,239,.9)); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid rgba(47,111,95,.22); outline-offset: 2px; }
+.primary { box-shadow: 0 7px 16px rgba(47,111,95,.18); }
+.primary:hover { transform: translateY(-1px); }
+.ghost, .primary { transition: transform .15s ease, background .15s ease, box-shadow .15s ease; }

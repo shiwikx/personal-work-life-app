@@ -20,14 +20,14 @@ $form.Size = New-Object System.Drawing.Size(370, 540)
 $form.MinimumSize = New-Object System.Drawing.Size(300, 56)
 $form.TopMost = $true
 $form.ShowInTaskbar = $false
-$form.BackColor = [System.Drawing.Color]::FromArgb(255, 254, 250)
+$form.Opacity = 0.94`r`n$form.BackColor = [System.Drawing.Color]::FromArgb(250, 252, 249)
 $screen = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
 $form.Location = New-Object System.Drawing.Point(($screen.Right - 386), ($screen.Top + 20))
 
 $header = New-Object System.Windows.Forms.Panel
 $header.Dock = [System.Windows.Forms.DockStyle]::Top
 $header.Height = 54
-$header.BackColor = [System.Drawing.Color]::FromArgb(29, 40, 35)
+$header.BackColor = [System.Drawing.Color]::FromArgb(238, 29, 40, 35)
 $form.Controls.Add($header)
 
 $title = New-Object System.Windows.Forms.Label
@@ -67,6 +67,32 @@ $list.WrapContents = $false
 $list.Padding = New-Object System.Windows.Forms.Padding(10)
 $form.Controls.Add($list)
 $list.BringToFront()
+
+$resizeGrip = New-Object System.Windows.Forms.Label
+$resizeGrip.Text = "◢"
+$resizeGrip.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+$resizeGrip.BackColor = [System.Drawing.Color]::Transparent
+$resizeGrip.ForeColor = [System.Drawing.Color]::FromArgb(95, 105, 99)
+$resizeGrip.Cursor = [System.Windows.Forms.Cursors]::SizeNWSE
+$resizeGrip.Size = New-Object System.Drawing.Size(20, 20)
+$resizeGrip.Anchor = [System.Windows.Forms.AnchorStyles]::Bottom -bor [System.Windows.Forms.AnchorStyles]::Right
+$form.Controls.Add($resizeGrip)
+$resizeGrip.BringToFront()
+$resizeStart = $null
+$resizeGrip.Add_MouseDown({
+  param($sender, $event)
+  if ($event.Button -eq [System.Windows.Forms.MouseButtons]::Left) {
+    $script:resizeStart = New-Object psobject -Property @{ X = $event.X; Y = $event.Y; Width = $form.Width; Height = $form.Height }
+  }
+})
+$resizeGrip.Add_MouseMove({
+  param($sender, $event)
+  if ($event.Button -eq [System.Windows.Forms.MouseButtons]::Left -and $script:resizeStart) {
+    $form.Width = [Math]::Max(300, $script:resizeStart.Width + ($event.X - $script:resizeStart.X))
+    $form.Height = [Math]::Max(120, $script:resizeStart.Height + ($event.Y - $script:resizeStart.Y))
+  }
+})
+$resizeGrip.Add_MouseUp({ $script:resizeStart = $null })
 
 $expandedHeight = 540
 $dragPoint = New-Object System.Drawing.Point(0, 0)
