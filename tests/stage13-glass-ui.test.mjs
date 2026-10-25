@@ -14,6 +14,12 @@ test('毛玻璃界面包含磨砂模糊、细颗粒、边缘高光和扩散阴�
   assert.match(css, /background-image: radial-gradient\(rgba\(32, 45, 38, 0\.68\) 0\.55px/);
   assert.match(css, /inset 0 1px 0 rgba\(255, 255, 255, 0\.92\)/);
   assert.match(css, /0 22px 55px rgba\(47, 61, 53, 0\.11\)/);
+  assert.match(css, /--glass-blur: blur\(24px\) saturate\(132%\)/);
+  assert.match(css, /mask-composite: exclude/);
+  assert.match(css, /inset 0 -1px 1px rgba\(71, 92, 80, 0\.10\)/);
+  assert.match(css, /background-size: auto, auto, 3px 3px/);
+  assert.match(css, /rgba\(82, 168, 139, 0\.48\)/);
+  assert.match(css, /linear-gradient\(115deg, rgba\(255,255,255,\.58\)/);
 
   const root = mkdtempSync(join(tmpdir(), 'pwla-glass-ui-'));
   const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0, scheduler: false, persistDataRoot: false, nativeActions: false });
@@ -30,4 +36,5 @@ test('毛玻璃界面包含磨砂模糊、细颗粒、边缘高光和扩散阴�
     await app.close(); rmSync(root, { recursive: true, force: true });
   }
 });
+
 
