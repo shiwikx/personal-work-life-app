@@ -89,7 +89,7 @@ $studyTimer.Text = "学习计时 --:--:--"
 $studyTimer.ForeColor = [System.Drawing.Color]::FromArgb(190, 220, 204)
 $studyTimer.Font = New-Object System.Drawing.Font("Consolas", 10, [System.Drawing.FontStyle]::Regular)
 $studyTimer.Location = New-Object System.Drawing.Point(16, 35)
-$studyTimer.Size = New-Object System.Drawing.Size(240, 22)
+$studyTimer.Size = New-Object System.Drawing.Size(214, 22)
 $studyTimer.Cursor = [System.Windows.Forms.Cursors]::Hand
 $studyTimer.Add_Click({ Start-Process "$ApiBase/#/study" })
 $header.Controls.Add($studyTimer)
@@ -99,9 +99,10 @@ $collapse.Text = "—"
 $collapse.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
 $collapse.ForeColor = [System.Drawing.Color]::White
 $collapse.BackColor = [System.Drawing.Color]::FromArgb(29, 40, 35)
-$collapse.Location = New-Object System.Drawing.Point(276, 18)
+$collapse.Location = New-Object System.Drawing.Point(($form.ClientSize.Width - 78), 18)
 $collapse.Size = New-Object System.Drawing.Size(34, 32)
 $collapse.FlatAppearance.BorderSize = 0
+$collapse.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Right
 $header.Controls.Add($collapse)
 
 $hide = New-Object System.Windows.Forms.Button
@@ -109,9 +110,10 @@ $hide.Text = "×"
 $hide.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
 $hide.ForeColor = [System.Drawing.Color]::White
 $hide.BackColor = [System.Drawing.Color]::FromArgb(29, 40, 35)
-$hide.Location = New-Object System.Drawing.Point(316, 18)
+$hide.Location = New-Object System.Drawing.Point(($form.ClientSize.Width - 38), 18)
 $hide.Size = New-Object System.Drawing.Size(34, 32)
 $hide.FlatAppearance.BorderSize = 0
+$hide.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Right
 $header.Controls.Add($hide)
 
 $list = New-Object System.Windows.Forms.FlowLayoutPanel

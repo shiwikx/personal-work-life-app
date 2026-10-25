@@ -24,3 +24,4 @@ test('悬浮窗整体缩小并支持四边四角自由缩放', () => {
   assert.match(overlay, /\$form\.Add_ResizeEnd/);
   assert.ok(!overlay.includes('`r`n'));
 });
+
