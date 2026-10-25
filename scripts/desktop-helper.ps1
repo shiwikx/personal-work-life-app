@@ -5,6 +5,47 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+Add-Type -ReferencedAssemblies System.Windows.Forms,System.Drawing -TypeDefinition @"
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+public class GlassResizeForm : Form
+{
+    private const int WM_NCHITTEST = 0x84;
+    private const int HTCLIENT = 1;
+    private const int HTLEFT = 10;
+    private const int HTRIGHT = 11;
+    private const int HTTOP = 12;
+    private const int HTTOPLEFT = 13;
+    private const int HTTOPRIGHT = 14;
+    private const int HTBOTTOM = 15;
+    private const int HTBOTTOMLEFT = 16;
+    private const int HTBOTTOMRIGHT = 17;
+
+    protected override void WndProc(ref Message m)
+    {
+        base.WndProc(ref m);
+        if (m.Msg != WM_NCHITTEST || m.Result.ToInt32() != HTCLIENT) return;
+
+        Point p = PointToClient(Cursor.Position);
+        int edge = 8;
+        bool left = p.X <= edge;
+        bool right = p.X >= ClientSize.Width - edge;
+        bool top = p.Y <= edge;
+        bool bottom = p.Y >= ClientSize.Height - edge;
+
+        if (left && top) m.Result = (IntPtr)HTTOPLEFT;
+        else if (right && top) m.Result = (IntPtr)HTTOPRIGHT;
+        else if (left && bottom) m.Result = (IntPtr)HTBOTTOMLEFT;
+        else if (right && bottom) m.Result = (IntPtr)HTBOTTOMRIGHT;
+        else if (left) m.Result = (IntPtr)HTLEFT;
+        else if (right) m.Result = (IntPtr)HTRIGHT;
+        else if (top) m.Result = (IntPtr)HTTOP;
+        else if (bottom) m.Result = (IntPtr)HTBOTTOM;
+    }
+}
+"@
 [System.Windows.Forms.Application]::EnableVisualStyles()
 $createdNew = $false
 $helperMutex = New-Object System.Threading.Mutex($true, "PersonalWorkLifeApp.DesktopHelper", [ref]$createdNew)
@@ -15,17 +56,18 @@ $notify.Icon = [System.Drawing.SystemIcons]::Application
 $notify.Text = "个人工作生活 - 今日事项"
 $notify.Visible = $true
 
-$form = New-Object System.Windows.Forms.Form
+$form = New-Object GlassResizeForm
 $form.Text = "今日未完成事项"
 $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::None
 $form.StartPosition = [System.Windows.Forms.FormStartPosition]::Manual
-$form.Size = New-Object System.Drawing.Size(370, 560)
-$form.MinimumSize = New-Object System.Drawing.Size(300, 72)
+$form.Size = New-Object System.Drawing.Size(320, 420)
+$form.MinimumSize = New-Object System.Drawing.Size(240, 64)
 $form.TopMost = $true
 $form.ShowInTaskbar = $false
-$form.Opacity = 0.94`r`n$form.BackColor = [System.Drawing.Color]::FromArgb(250, 252, 249)
+$form.Opacity = 0.94
+$form.BackColor = [System.Drawing.Color]::FromArgb(250, 252, 249)
 $screen = [System.Windows.Forms.Screen]::PrimaryScreen.WorkingArea
-$form.Location = New-Object System.Drawing.Point(($screen.Right - 386), ($screen.Top + 20))
+$form.Location = New-Object System.Drawing.Point(($screen.Right - 336), ($screen.Top + 20))
 
 $header = New-Object System.Windows.Forms.Panel
 $header.Dock = [System.Windows.Forms.DockStyle]::Top
@@ -88,7 +130,8 @@ $resizeGrip.BackColor = [System.Drawing.Color]::Transparent
 $resizeGrip.ForeColor = [System.Drawing.Color]::FromArgb(95, 105, 99)
 $resizeGrip.Cursor = [System.Windows.Forms.Cursors]::SizeNWSE
 $resizeGrip.Size = New-Object System.Drawing.Size(30, 30)
-$resizeGrip.Location = New-Object System.Drawing.Point(($form.ClientSize.Width - 34), ($form.ClientSize.Height - 34))`r`n$resizeGrip.Anchor = [System.Windows.Forms.AnchorStyles]::Bottom -bor [System.Windows.Forms.AnchorStyles]::Right
+$resizeGrip.Location = New-Object System.Drawing.Point(($form.ClientSize.Width - 34), ($form.ClientSize.Height - 34))
+$resizeGrip.Anchor = [System.Windows.Forms.AnchorStyles]::Bottom -bor [System.Windows.Forms.AnchorStyles]::Right
 $form.Controls.Add($resizeGrip)
 $resizeGrip.BringToFront()
 $resizeStart = $null
@@ -106,8 +149,9 @@ $resizeGrip.Add_MouseMove({
   }
 })
 $resizeGrip.Add_MouseUp({ $script:resizeStart = $null })
+$form.Add_ResizeEnd({ if ($list.Visible) { Refresh-Today } })
 
-$expandedHeight = 560
+$expandedHeight = 420
 $dragPoint = New-Object System.Drawing.Point(0, 0)
 $header.Add_MouseDown({ param($sender, $event) $script:dragPoint = $event.Location })
 $header.Add_MouseMove({
@@ -206,11 +250,11 @@ $openItem = $menu.Items.Add("打开主页面")
 $openItem.Add_Click({ Start-Process "$ApiBase" })
 $menu.Items.Add("-") | Out-Null
 $smallWindow = $menu.Items.Add("紧凑大小")
-$smallWindow.Add_Click({ $form.Size = New-Object System.Drawing.Size(320, 420); $list.Visible = $true })
+$smallWindow.Add_Click({ $form.Size = New-Object System.Drawing.Size(280, 340); $list.Visible = $true })
 $standardWindow = $menu.Items.Add("标准大小")
-$standardWindow.Add_Click({ $form.Size = New-Object System.Drawing.Size(370, 560); $list.Visible = $true })
+$standardWindow.Add_Click({ $form.Size = New-Object System.Drawing.Size(320, 420); $list.Visible = $true })
 $largeWindow = $menu.Items.Add("宽屏大小")
-$largeWindow.Add_Click({ $form.Size = New-Object System.Drawing.Size(460, 700); $list.Visible = $true })
+$largeWindow.Add_Click({ $form.Size = New-Object System.Drawing.Size(430, 580); $list.Visible = $true })
 $menu.Items.Add("-") | Out-Null
 $exitItem = $menu.Items.Add("退出桌面助手")
 $exitItem.Add_Click({ $notify.Visible = $false; $notify.Dispose(); [System.Windows.Forms.Application]::Exit() })
