@@ -6,7 +6,7 @@ import test from 'node:test';
 import { createApp } from '../src/server/app.mjs';
 import { dumpDom, findBrowser } from './helpers/browser.mjs';
 
-test('毛玻璃界面包含磨砂模糊、细颗粒、边缘高光和扩散阴影', { skip: !findBrowser() }, async () => {
+test('无色透明玻璃界面包含高透光、厚度、折射边缘和高光', { skip: !findBrowser() }, async () => {
   const css = readFileSync(join(process.cwd(), 'src/client/styles.css'), 'utf8');
   assert.match(css, /Frosted glass visual system/);
   assert.match(css, /--glass-blur: blur\(20px\) saturate\(125%\)/);
@@ -15,6 +15,11 @@ test('毛玻璃界面包含磨砂模糊、细颗粒、边缘高光和扩散阴�
   assert.match(css, /inset 0 1px 0 rgba\(255, 255, 255, 0\.92\)/);
   assert.match(css, /0 22px 55px rgba\(47, 61, 53, 0\.11\)/);
   assert.match(css, /--glass-blur: blur\(24px\) saturate\(132%\)/);
+  assert.match(css, /Colorless transparent optical glass/);
+  assert.match(css, /--clear-glass-blur: blur\(2\.5px\) saturate\(108%\)/);
+  assert.match(css, /--clear-glass-fill: rgba\(255, 255, 255, 0\.10\)/);
+  assert.match(css, /inset 0 -1px 1px rgba\(54, 75, 64, 0\.18\)/);
+  assert.match(css, /linear-gradient\(135deg, rgba\(255, 255, 255, 0\.20\)/);
   assert.match(css, /mask-composite: exclude/);
   assert.match(css, /inset 0 -1px 1px rgba\(71, 92, 80, 0\.10\)/);
   assert.match(css, /background-size: auto, auto, 3px 3px/);
@@ -36,5 +41,7 @@ test('毛玻璃界面包含磨砂模糊、细颗粒、边缘高光和扩散阴�
     await app.close(); rmSync(root, { recursive: true, force: true });
   }
 });
+
+
 
 

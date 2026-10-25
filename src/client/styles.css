@@ -424,3 +424,117 @@ input, textarea, select {
   background: linear-gradient(145deg, rgba(255,255,255,.84), rgba(231,242,236,.5));
   box-shadow: inset 0 1px 0 #fff, inset 0 -1px 1px rgba(67,91,77,.1), 0 4px 10px rgba(37,76,61,.12);
 }
+
+/* Colorless transparent optical glass — UI only */
+:root {
+  --clear-glass-fill: rgba(255, 255, 255, 0.10);
+  --clear-glass-fill-soft: rgba(255, 255, 255, 0.055);
+  --clear-glass-edge: rgba(255, 255, 255, 0.86);
+  --clear-glass-blur: blur(2.5px) saturate(108%);
+  --clear-glass-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.98),
+    inset 0 -1px 1px rgba(54, 75, 64, 0.18),
+    inset 1px 0 1px rgba(255, 255, 255, 0.52),
+    inset -1px 0 1px rgba(255, 255, 255, 0.26),
+    0 1px 0 rgba(255, 255, 255, 0.28),
+    0 24px 55px rgba(36, 53, 43, 0.13),
+    0 6px 16px rgba(36, 53, 43, 0.065);
+}
+
+body::before { display: none; }
+body {
+  background:
+    radial-gradient(circle at 11% 16%, rgba(73, 160, 133, 0.55) 0, rgba(73, 160, 133, 0.13) 21%, transparent 43%),
+    radial-gradient(circle at 88% 9%, rgba(86, 145, 193, 0.5) 0, rgba(86, 145, 193, 0.11) 22%, transparent 45%),
+    radial-gradient(circle at 75% 88%, rgba(211, 167, 101, 0.42) 0, rgba(211, 167, 101, 0.09) 20%, transparent 43%),
+    radial-gradient(circle at 38% 69%, rgba(139, 190, 169, 0.38) 0, transparent 41%),
+    linear-gradient(145deg, #edf2ed 0%, #dfe7e2 43%, #eee9df 100%);
+}
+
+.panel,
+.stat-card,
+.module-card,
+.memo-card,
+.entity-card,
+.report-card,
+.export-card,
+.backup-row,
+.today-task-form,
+.add-form-disclosure,
+.entity-form {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.035) 42%, rgba(255, 255, 255, 0.09) 100%),
+    var(--clear-glass-fill-soft);
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  box-shadow: var(--clear-glass-shadow);
+  -webkit-backdrop-filter: var(--clear-glass-blur);
+  backdrop-filter: var(--clear-glass-blur);
+}
+.panel::before,
+.stat-card::before,
+.module-card::before,
+.today-task-form::before,
+.entity-form::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(255,255,255,.72) 1.5%, transparent 10%, transparent 76%, rgba(255,255,255,.78) 94%, rgba(255,255,255,.26) 100%),
+    linear-gradient(180deg, rgba(255,255,255,.16), transparent 22%, transparent 78%, rgba(255,255,255,.24));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: .94;
+}
+.panel::after,
+.stat-card::after,
+.module-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(112deg, transparent 0%, rgba(255,255,255,.30) 8%, rgba(255,255,255,.08) 13%, transparent 20%, transparent 73%, rgba(255,255,255,.13) 84%, transparent 94%),
+    linear-gradient(180deg, rgba(255,255,255,.16), transparent 18%, transparent 82%, rgba(255,255,255,.06));
+  opacity: .66;
+  mix-blend-mode: screen;
+}
+.task-row,
+.memo-card,
+.entity-card {
+  background:
+    linear-gradient(125deg, rgba(255,255,255,.20), rgba(255,255,255,.035) 50%, rgba(255,255,255,.10)),
+    rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.96),
+    inset 0 -1px 0 rgba(56,78,66,.09),
+    0 7px 17px rgba(47,67,55,.05);
+}
+input, textarea, select {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.24), rgba(255,255,255,.055)),
+    rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.64);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.98),
+    inset 0 -1px 1px rgba(52,74,62,.10),
+    0 2px 7px rgba(40,58,48,.04);
+}
+.check {
+  background: linear-gradient(145deg, rgba(255,255,255,.32), rgba(255,255,255,.08));
+  box-shadow: inset 0 1px 0 #fff, inset 0 -1px 1px rgba(52,78,64,.14), 0 4px 10px rgba(37,76,61,.10);
+}
+.sidebar {
+  background:
+    linear-gradient(180deg, rgba(31, 47, 39, 0.65), rgba(20, 35, 28, 0.54)),
+    rgba(255,255,255,.02);
+  -webkit-backdrop-filter: blur(8px) saturate(105%);
+  backdrop-filter: blur(8px) saturate(105%);
+  border-right-color: rgba(255,255,255,.24);
+}
