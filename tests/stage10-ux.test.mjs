@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { createApp } from '../src/server/app.mjs';
+import { addDays, localDateString } from '../src/core/date.mjs';
 import { dumpDom, findBrowser } from './helpers/browser.mjs';
 
 const read = (file) => readFileSync(join(process.cwd(), file), 'utf8');
@@ -112,23 +113,26 @@ test('问题7：新增笔试或面试安排后下一场自动更新', { skip: !f
   const root = mkdtempSync(join(tmpdir(), 'pwla-autumn-next-'));
   const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0, scheduler: false, persistDataRoot: false, nativeActions: false });
   const base = `http://127.0.0.1:${app.port}`;
+  const today = localDateString();
+  const tomorrow = addDays(today, 1);
+  const later = addDays(today, 5);
   try {
-    await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ module: 'autumn', type: 'autumn_application', title: '投递 A', date: '2026-10-23', payload: { examAt: '2026-10-28T09:00' } }) });
-    let summary = await fetch(`${base}/api/autumn/summary?date=2026-10-23`).then((response) => response.json());
-    assert.equal(summary.nextExamOrInterview.at, '2026-10-28T09:00');
-    await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ module: 'autumn', type: 'autumn_event', title: '新增笔试', date: '2026-10-24', scheduledTime: '14:00', payload: { eventType: 'exam', format: '线上' } }) });
-    summary = await fetch(`${base}/api/autumn/summary?date=2026-10-23`).then((response) => response.json());
+    await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ module: 'autumn', type: 'autumn_application', title: '投递 A', date: today, payload: { examAt: `${later}T09:00` } }) });
+    let summary = await fetch(`${base}/api/autumn/summary?date=${today}`).then((response) => response.json());
+    assert.equal(summary.nextExamOrInterview.at, `${later}T09:00`);
+    await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ module: 'autumn', type: 'autumn_event', title: '新增笔试', date: tomorrow, scheduledTime: '14:00', payload: { eventType: 'exam', format: '线上' } }) });
+    summary = await fetch(`${base}/api/autumn/summary?date=${today}`).then((response) => response.json());
     assert.equal(summary.nextExamOrInterview.title, '新增笔试');
-    assert.equal(summary.nextExamOrInterview.at, '2026-10-24T14:00');
-    await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ module: 'autumn', type: 'autumn_event', title: '更早面试', date: '2026-10-23', scheduledTime: '18:00', payload: { eventType: 'interview' } }) });
-    summary = await fetch(`${base}/api/autumn/summary?date=2026-10-23`).then((response) => response.json());
+    assert.equal(summary.nextExamOrInterview.at, `${tomorrow}T14:00`);
+    await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ module: 'autumn', type: 'autumn_event', title: '更早面试', date: today, scheduledTime: '18:00', payload: { eventType: 'interview' } }) });
+    summary = await fetch(`${base}/api/autumn/summary?date=${today}`).then((response) => response.json());
     assert.equal(summary.nextExamOrInterview.title, '更早面试');
     assert.equal(summary.nextExamOrInterview.kind, 'interview');
     const page = await dumpDom(`${base}/#/autumn`);
     assert.equal(page.status, 0, page.stderr);
     assert.match(page.stdout, /笔试\/面试安排/);
     assert.match(page.stdout, /更早面试/);
-    assert.match(page.stdout, /2026-10-23 18:00/);
+    assert.match(page.stdout, new RegExp(`${today} 18:00`));
   } finally {
     await app.close(); rmSync(root, { recursive: true, force: true });
   }
@@ -178,3 +182,4 @@ test('问题9：悬浮窗关闭后可从主页面或独立脚本重新打开', {
     rmSync(root, { recursive: true, force: true });
   }
 });
+
