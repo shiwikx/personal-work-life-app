@@ -44,3 +44,22 @@ test('完成后事项继续显示在首页、今日计划和所属模块', { ski
     await app.close(); rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('前端资源禁用缓存以确保完成记录界面立即加载', async () => {
+  const root = mkdtempSync(join(tmpdir(), 'pwla-cache-'));
+  const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0, scheduler: false, persistDataRoot: false, nativeActions: false });
+  const base = `http://127.0.0.1:${app.port}`;
+  try {
+    const script = await fetch(`${base}/app.js`);
+    const styles = await fetch(`${base}/styles.css`);
+    const index = await fetch(`${base}/`);
+    assert.equal(script.headers.get('cache-control'), 'no-store');
+    assert.equal(styles.headers.get('cache-control'), 'no-store');
+    const html = await index.text();
+    assert.match(html, /app\.js\?v=20261025-2/);
+    assert.match(html, /styles\.css\?v=20261025-2/);
+    assert.match(await script.text(), /含已完成记录/);
+  } finally {
+    await app.close(); rmSync(root, { recursive: true, force: true });
+  }
+});

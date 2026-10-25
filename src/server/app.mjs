@@ -80,8 +80,9 @@ function serveStatic(pathname, res, clientRoot) {
   res.writeHead(200, {
     'Content-Type': MIME_TYPES[extname(filePath)] || 'application/octet-stream',
     'Content-Length': body.length,
-    'Cache-Control': extname(filePath) === '.html' ? 'no-store' : 'public, max-age=3600',
+    'Cache-Control': 'no-store',
   });
   res.end(body);
 }
+
 
