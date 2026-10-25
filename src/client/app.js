@@ -137,8 +137,15 @@ const todayString = () => {
 const state = {
   route: location.hash.replace(/^#/, '') || '/',
   selectedDate: todayString(),
+  theme: document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light',
   notice: null,
 };
+
+function applyTheme(theme) {
+  state.theme = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = state.theme;
+  try { localStorage.setItem('pwla-theme', state.theme); } catch {}
+}
 
 const PRIORITY_LEVELS = {
   0: { label: '普通', className: 'priority-normal' },
@@ -200,8 +207,8 @@ function shell(content) {
         ${NAV_ITEMS.map((item) => `<a href="#${item.path}" class="${active === item.path ? 'active' : ''}"><span class="nav-icon">${item.icon}</span>${item.label}</a>`).join('')}
       </nav>
       <div class="sidebar-foot">
-        <span class="status-dot"></span>
-        <span>本地数据已连接</span>
+        <div class="sidebar-connection"><span class="status-dot"></span><span>本地数据已连接</span></div>
+        <button class="theme-toggle" data-action="toggle-theme" title="切换浅色/深色主题">${state.theme === 'dark' ? '☀ 浅色模式' : '☾ 深色模式'}</button>
       </div>
     </aside>
     <main class="main">${content}</main>
@@ -572,6 +579,11 @@ app.addEventListener('click', async (event) => {
   const action = target.dataset.action;
   const id = target.dataset.id;
   try {
+    if (action === 'toggle-theme') {
+      applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+      await render();
+      return;
+    }
     if (action === 'open-overlay') {
       await api('/api/desktop/overlay', { method: 'POST', body: '{}' });
       showNotice('已发送悬浮窗显示请求');
@@ -784,6 +796,8 @@ app.addEventListener('submit', async (event) => {
 
 window.addEventListener('hashchange', render);
 render();
+
+
 
 
 

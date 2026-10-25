@@ -4,7 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>个人工作生活 APP</title>
-  <link rel="stylesheet" href="/styles.css?v=20261025-weatherglass2" />
+  <script>
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const saved = params.get("theme") || localStorage.getItem("pwla-theme");
+      const preferred = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      document.documentElement.dataset.theme = saved === "dark" || saved === "light" ? saved : preferred;
+    })();
+  </script>
+  <link rel="stylesheet" href="/styles.css?v=20261025-theme" />
 </head>
 <body>
   <div id="app">
@@ -20,12 +28,6 @@
       </section>
     </main>
   </div>
-  <script type="module" src="/app.js?v=20261025-weatherglass2"></script>
+  <script type="module" src="/app.js?v=20261025-theme"></script>
 </body>
 </html>
-
-
-
-
-
-
