@@ -38,15 +38,23 @@ test('路由基线只包含确认的八个模块', () => {
     assert.ok(!routes.includes(removed), removed);
   }
 });
-test('PRD v1.1 包含当前视觉、主题和交互要求', () => {
+test('PRD v1.2 包含当前视觉、主题和交互要求', () => {
   const prd = read('PRD.md');
-  assert.match(prd, /文档版本：v1\.1/);
+  assert.match(prd, /文档版本：v1\.2/);
   assert.match(prd, /### 2\.4 视觉与主题规范/);
-  assert.match(prd, /macOS 天气 App 风格的透明玻璃视觉语言/);
+  assert.match(prd, /主界面参考 macOS 天气 App/);
   assert.match(prd, /浅色、深色主题切换/);
   assert.match(prd, /普通、低、中、高、紧急五级/);
   assert.match(prd, /完成事项必须继续显示在首页、今日计划和所属模块中/);
   assert.match(prd, /各模块的添加表单默认折叠/);
   assert.match(prd, /### 10\.13 视觉主题与交互/);
-  assert.match(prd, /主题选择在刷新浏览器或重新打开 APP 后仍能恢复/);
+  assert.match(prd, /主题选择在刷新浏览器、关闭后重新打开 APP 时仍能恢复/);
+  assert.match(prd, /悬浮窗口默认尺寸为 `320×420`，最小尺寸为 `240×64`/);
+  assert.match(prd, /悬浮窗口支持从四边、四角及右下角缩放把手自由调整尺寸/);
+  assert.match(prd, /关闭按钮，窗口缩放后按钮不得消失或与学习计时重叠/);
+  assert.match(prd, /前端资源使用 `no-store` 缓存策略和版本参数/);
 });
+
+
+
+
