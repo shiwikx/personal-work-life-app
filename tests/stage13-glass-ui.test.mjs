@@ -24,6 +24,13 @@ test('无色透明玻璃界面包含高透光、厚度、折射边缘和高光',
   assert.match(css, /--accent: #565d59/);
   assert.match(css, /--clear-glass-blur: blur\(1\.8px\) saturate\(102%\)/);
   assert.match(css, /background: #d7dad8/);
+  assert.match(css, /macOS Weather inspired transparent glass/);
+  assert.match(css, /--weather-blue-deep: #17365f/);
+  assert.match(css, /--clear-glass-blur: blur\(10px\) saturate\(118%\)/);
+  assert.match(css, /linear-gradient\(180deg, var\(--weather-blue-deep\)/);
+  assert.match(css, /background: linear-gradient\(135deg, rgba\(21, 55, 88, \.83\)/);
+  assert.match(css, /\.page-header h1 \{ color: #fff;/);
+  assert.match(css, /rgba\(218, 244, 255, 0\.86\)/);
   assert.match(css, /linear-gradient\(135deg, #626865, #424845\)/);
   assert.match(css, /mask-composite: exclude/);
   assert.match(css, /inset 0 -1px 1px rgba\(71, 92, 80, 0\.10\)/);
@@ -46,6 +53,8 @@ test('无色透明玻璃界面包含高透光、厚度、折射边缘和高光',
     await app.close(); rmSync(root, { recursive: true, force: true });
   }
 });
+
+
 
 
 
