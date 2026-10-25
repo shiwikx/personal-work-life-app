@@ -87,8 +87,8 @@ $resizeGrip.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
 $resizeGrip.BackColor = [System.Drawing.Color]::Transparent
 $resizeGrip.ForeColor = [System.Drawing.Color]::FromArgb(95, 105, 99)
 $resizeGrip.Cursor = [System.Windows.Forms.Cursors]::SizeNWSE
-$resizeGrip.Size = New-Object System.Drawing.Size(20, 20)
-$resizeGrip.Anchor = [System.Windows.Forms.AnchorStyles]::Bottom -bor [System.Windows.Forms.AnchorStyles]::Right
+$resizeGrip.Size = New-Object System.Drawing.Size(30, 30)
+$resizeGrip.Location = New-Object System.Drawing.Point(($form.ClientSize.Width - 34), ($form.ClientSize.Height - 34))`r`n$resizeGrip.Anchor = [System.Windows.Forms.AnchorStyles]::Bottom -bor [System.Windows.Forms.AnchorStyles]::Right
 $form.Controls.Add($resizeGrip)
 $resizeGrip.BringToFront()
 $resizeStart = $null
@@ -204,6 +204,13 @@ $showItem = $menu.Items.Add("显示今日事项")
 $showItem.Add_Click({ $form.Show(); $form.Activate() })
 $openItem = $menu.Items.Add("打开主页面")
 $openItem.Add_Click({ Start-Process "$ApiBase" })
+$menu.Items.Add("-") | Out-Null
+$smallWindow = $menu.Items.Add("紧凑大小")
+$smallWindow.Add_Click({ $form.Size = New-Object System.Drawing.Size(320, 420); $list.Visible = $true })
+$standardWindow = $menu.Items.Add("标准大小")
+$standardWindow.Add_Click({ $form.Size = New-Object System.Drawing.Size(370, 560); $list.Visible = $true })
+$largeWindow = $menu.Items.Add("宽屏大小")
+$largeWindow.Add_Click({ $form.Size = New-Object System.Drawing.Size(460, 700); $list.Visible = $true })
 $menu.Items.Add("-") | Out-Null
 $exitItem = $menu.Items.Add("退出桌面助手")
 $exitItem.Add_Click({ $notify.Visible = $false; $notify.Dispose(); [System.Windows.Forms.Application]::Exit() })
