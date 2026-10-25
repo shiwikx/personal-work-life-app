@@ -239,6 +239,7 @@ function taskRow(item, options = {}) {
           <span>进度 ${item.effectiveProgress ?? 0}%</span>
           ${item.autoProgress !== null ? `<span>自动 ${item.autoProgress}%</span>` : ''}
           ${item.manualProgress !== null ? `<span>手动 ${item.manualProgress}%</span>` : ''}
+          ${item.occurrenceState?.completed_at || item.completedAt ? `<span>完成于 ${escapeHtml(String(item.occurrenceState?.completed_at || item.completedAt).replace('T', ' '))}</span>` : ''}
         </div>
       </div>
       <div class="row-actions">
@@ -318,7 +319,11 @@ function memoCard(memo) {
 }
 
 async function renderToday() {
-  const data = await api(`/api/today?date=${state.selectedDate}`);
+  const [data, completedData] = await Promise.all([
+    api(`/api/today?date=${state.selectedDate}`),
+    api(`/api/today?date=${state.selectedDate}&includeCompleted=true`),
+  ]);
+  const completedItems = completedData.items.filter((item) => item.completedForOccurrence);
   const content = `
     ${pageHeader('今日计划', '统一安排自己的事项，并自动汇总各模块当天的计划', `
       <label class="date-control">日期 <input type="date" value="${state.selectedDate}" data-action="change-date" /></label>
@@ -342,6 +347,10 @@ async function renderToday() {
     <section class="panel">
       <div class="panel-head"><div><p class="eyebrow">SCHEDULE</p><h2>${state.selectedDate} 的计划</h2></div></div>
       <div class="task-list">${data.items.length ? data.items.map((item) => taskRow(item)).join('') : '<div class="empty">这一天还没有未完成事项</div>'}</div>
+    </section>
+    <section class="panel completed-today-panel">
+      <div class="panel-head"><div><p class="eyebrow">COMPLETED</p><h2>已完成记录</h2></div><span class="count">${completedItems.length} 条</span></div>
+      <div class="task-list">${completedItems.length ? completedItems.map((item) => taskRow(item)).join('') : '<div class="empty">这一天还没有完成记录</div>'}</div>
     </section>
   `;
   shell(content);
@@ -777,6 +786,9 @@ app.addEventListener('submit', async (event) => {
 
 window.addEventListener('hashchange', render);
 render();
+
+
+
 
 
 
