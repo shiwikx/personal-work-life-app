@@ -216,6 +216,7 @@ export async function handleApi(req, res, url, store, sendJson, scheduler = null
     sendJson(res, 200, {
       date,
       today,
+      todayAll,
       counts: { todayOpen: today.length, todayCompleted: Math.max(0, todayAll.length - today.length) },
       summary,
       memos: store.listMemos(),
@@ -427,6 +428,8 @@ export async function readJson(req) {
 export function id(prefix = '') {
   return `${prefix}${randomUUID()}`;
 }
+
+
 
 
 

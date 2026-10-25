@@ -257,6 +257,7 @@ function moduleLabel(module) {
 async function renderHome() {
   const data = await api(`/api/home?date=${state.selectedDate}`);
   const modules = ['thesis', 'study', 'development', 'autumn', 'work'];
+  const todayItems = [...(data.todayAll || data.today)].sort((a, b) => Number(a.completedForOccurrence) - Number(b.completedForOccurrence));
   const content = `
     ${pageHeader('首页总览', `${state.selectedDate} · 今天最值得关注的事情都在这里`, `<button class="primary" data-action="go-today">打开今日计划</button>`)}
     <section class="stat-grid home-stats">
@@ -272,8 +273,8 @@ async function renderHome() {
     </section>
     <section class="content-grid">
       <div class="panel wide">
-        <div class="panel-head"><div><p class="eyebrow">TODAY</p><h2>今日计划摘要</h2></div><span class="count">${data.today.length}</span></div>
-        <div class="task-list">${data.today.length ? data.today.map((item) => taskRow(item)).join('') : '<div class="empty">今天没有未完成事项</div>'}</div>
+        <div class="panel-head"><div><p class="eyebrow">TODAY</p><h2>今日计划摘要</h2></div><span class="count">${todayItems.length}</span></div>
+        <div class="task-list">${todayItems.length ? todayItems.map((item) => taskRow(item)).join('') : '<div class="empty">今天没有计划事项</div>'}</div>
       </div>
       <div class="panel">
         <div class="panel-head"><div><p class="eyebrow">QUICK MEMO</p><h2>快速备忘</h2></div></div>
@@ -324,6 +325,7 @@ async function renderToday() {
     api(`/api/today?date=${state.selectedDate}&includeCompleted=true`),
   ]);
   const completedItems = completedData.items.filter((item) => item.completedForOccurrence);
+  const allItems = [...data.items, ...completedItems].sort((a, b) => Number(a.completedForOccurrence) - Number(b.completedForOccurrence));
   const content = `
     ${pageHeader('今日计划', '统一安排自己的事项，并自动汇总各模块当天的计划', `
       <label class="date-control">日期 <input type="date" value="${state.selectedDate}" data-action="change-date" /></label>
@@ -345,12 +347,8 @@ async function renderToday() {
       </form>
     </section>
     <section class="panel">
-      <div class="panel-head"><div><p class="eyebrow">SCHEDULE</p><h2>${state.selectedDate} 的计划</h2></div></div>
-      <div class="task-list">${data.items.length ? data.items.map((item) => taskRow(item)).join('') : '<div class="empty">这一天还没有未完成事项</div>'}</div>
-    </section>
-    <section class="panel completed-today-panel">
-      <div class="panel-head"><div><p class="eyebrow">COMPLETED</p><h2>已完成记录</h2></div><span class="count">${completedItems.length} 条</span></div>
-      <div class="task-list">${completedItems.length ? completedItems.map((item) => taskRow(item)).join('') : '<div class="empty">这一天还没有完成记录</div>'}</div>
+      <div class="panel-head"><div><p class="eyebrow">SCHEDULE</p><h2>${state.selectedDate} 的计划（含已完成记录）</h2></div><span class="count">${data.items.length} 未完成 · ${completedItems.length} 已完成</span></div>
+      <div class="task-list">${allItems.length ? allItems.map((item) => taskRow(item)).join('') : '<div class="empty">这一天还没有计划事项</div>'}</div>
     </section>
   `;
   shell(content);
@@ -487,7 +485,7 @@ async function renderModulePage(route) {
         const activeItems = sectionItems.filter((item) => !['completed', 'done', 'closed'].includes(item.status));
         const archivedItems = sectionItems.filter((item) => ['completed', 'done', 'closed'].includes(item.status));
         const editingSection = state.editing?.module === route && state.editing?.type === section.type;
-        return `<section class="panel"><div class="panel-head"><div><p class="eyebrow">${escapeHtml(section.title)}</p><h2>${escapeHtml(section.title)}</h2></div><span class="count">${sectionItems.length} 条</span></div><details class="add-form-disclosure" ${editingSection ? 'open' : ''}><summary>+ 添加${escapeHtml(section.title)}</summary>${renderEntityForm(section, route, sectionItems, data.items)}</details><div class="entity-list">${activeItems.map((item) => moduleEntityCard(item, section, route)).join('') || '<div class="empty">暂无待处理记录</div>'}</div>${archivedItems.length ? `<details class="completed-archive"><summary>已完成存档 · ${archivedItems.length} 条</summary><div class="entity-list archived-list">${archivedItems.map((item) => moduleEntityCard(item, section, route)).join('')}</div></details>` : ''}</section>`;
+        return `<section class="panel"><div class="panel-head"><div><p class="eyebrow">${escapeHtml(section.title)}</p><h2>${escapeHtml(section.title)}</h2></div><span class="count">${sectionItems.length} 条</span></div><details class="add-form-disclosure" ${editingSection ? 'open' : ''}><summary>+ 添加${escapeHtml(section.title)}</summary>${renderEntityForm(section, route, sectionItems, data.items)}</details><div class="entity-list">${activeItems.map((item) => moduleEntityCard(item, section, route)).join('') || '<div class="empty">暂无待处理记录</div>'}</div>${archivedItems.length ? `<details class="completed-archive" open><summary>已完成存档 · ${archivedItems.length} 条</summary><div class="entity-list archived-list">${archivedItems.map((item) => moduleEntityCard(item, section, route)).join('')}</div></details>` : ''}</section>`;
       }).join('')}
     </div>
   `;
@@ -786,6 +784,8 @@ app.addEventListener('submit', async (event) => {
 
 window.addEventListener('hashchange', render);
 render();
+
+
 
 
 
