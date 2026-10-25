@@ -538,3 +538,81 @@ input, textarea, select {
   backdrop-filter: blur(8px) saturate(105%);
   border-right-color: rgba(255,255,255,.24);
 }
+
+/* Neutral colorless glass override — UI only */
+:root {
+  --bg: #eceeec;
+  --panel: rgba(255, 255, 255, 0.16);
+  --panel-2: rgba(255, 255, 255, 0.10);
+  --ink: #222523;
+  --muted: #6f746f;
+  --line: rgba(255, 255, 255, 0.52);
+  --accent: #565d59;
+  --accent-dark: #343a37;
+  --accent-soft: rgba(232, 234, 233, 0.72);
+  --danger: #9f4e46;
+  --clear-glass-fill: rgba(255, 255, 255, 0.085);
+  --clear-glass-fill-soft: rgba(255, 255, 255, 0.035);
+  --clear-glass-blur: blur(1.8px) saturate(102%);
+}
+body {
+  background:
+    radial-gradient(circle at 12% 14%, rgba(197, 201, 199, 0.55) 0, transparent 38%),
+    radial-gradient(circle at 88% 8%, rgba(228, 230, 229, 0.74) 0, transparent 42%),
+    radial-gradient(circle at 76% 88%, rgba(185, 189, 187, 0.38) 0, transparent 42%),
+    linear-gradient(145deg, #f5f6f5 0%, #e6e8e7 46%, #f0efed 100%);
+}
+body::before { display: none; }
+.sidebar {
+  background: linear-gradient(180deg, rgba(47, 50, 48, 0.64), rgba(31, 34, 32, 0.56));
+  border-right-color: rgba(255, 255, 255, 0.28);
+  box-shadow: inset 1px 0 0 rgba(255,255,255,.14), inset -1px 0 0 rgba(255,255,255,.05), 14px 0 42px rgba(25,28,26,.13);
+}
+.brand-mark { background: rgba(255,255,255,.7); color: #303431; box-shadow: inset 0 1px 0 #fff; }
+.status-dot { background: #d7dad8; box-shadow: 0 0 0 4px rgba(215,218,216,.12); }
+nav a { color: #d7dad8; }
+nav a:hover { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.12); }
+nav a.active {
+  background: linear-gradient(135deg, rgba(255,255,255,.90), rgba(235,237,236,.70));
+  color: #292d2a;
+  border-color: rgba(255,255,255,.90);
+  box-shadow: inset 0 1px 0 #fff, 0 9px 22px rgba(21,24,22,.15);
+}
+.panel,
+.stat-card,
+.module-card,
+.memo-card,
+.entity-card,
+.report-card,
+.export-card,
+.backup-row,
+.today-task-form,
+.add-form-disclosure,
+.entity-form {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.15), rgba(255,255,255,.025) 44%, rgba(255,255,255,.07)),
+    var(--clear-glass-fill-soft);
+  border-color: rgba(255,255,255,.72);
+}
+.stat-card.accent {
+  background: linear-gradient(135deg, rgba(62,66,63,.86), rgba(40,44,41,.76));
+  border-color: rgba(255,255,255,.30);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 20px 48px rgba(30,33,31,.18);
+}
+.primary {
+  background: linear-gradient(135deg, #626865, #424845);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 9px 20px rgba(49,54,51,.18);
+}
+.primary:hover { background: linear-gradient(135deg, #535a56, #353b38); }
+.overall-progress-panel,
+.timer-panel {
+  background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(229,232,230,.07));
+}
+.overall-percent { color: #333936; }
+.progress-bar { background: rgba(80,86,82,.11); }
+.progress-bar i,
+.overall-progress-bar i { background: linear-gradient(90deg, #8c9490, #bfc4c1); }
+.check { color: #4a514d; }
+.task-row.completed .check { background: #5c635f; border-color: #5c635f; }
+.pill.success { background: rgba(230,233,231,.76); color: #414844; }
+.pill.priority { border-color: rgba(255,255,255,.34); }

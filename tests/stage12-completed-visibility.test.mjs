@@ -56,13 +56,14 @@ test('前端资源禁用缓存以确保完成记录界面立即加载', async ()
     assert.equal(script.headers.get('cache-control'), 'no-store');
     assert.equal(styles.headers.get('cache-control'), 'no-store');
     const html = await index.text();
-    assert.match(html, /app\.js\?v=20261025-glass3/);
-    assert.match(html, /styles\.css\?v=20261025-glass3/);
+    assert.match(html, /app\.js\?v=20261025-glass4/);
+    assert.match(html, /styles\.css\?v=20261025-glass4/);
     assert.match(await script.text(), /含已完成记录/);
   } finally {
     await app.close(); rmSync(root, { recursive: true, force: true });
   }
 });
+
 
 
 
