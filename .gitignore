@@ -15,3 +15,9 @@ data/
 backups/
 exports/
 logs/
+
+# 本地私人文件（禁止上传）
+_resume_dump.txt
+.env
+.env.*
+!.env.example
