@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>个人工作生活 APP</title>
+  <script>
+    (() => {
+      const params = new URLSearchParams(location.search);
+      const saved = params.get("theme") || localStorage.getItem("pwla-theme");
+      const preferred = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      document.documentElement.dataset.theme = saved === "dark" || saved === "light" ? saved : preferred;
+    })();
+  </script>
+  <link rel="stylesheet" href="/styles.css?v=20261025-theme" />
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <div class="brand">个人工作生活</div>
+      <nav id="nav"></nav>
+    </aside>
+    <main id="main" class="main">
+      <section class="hero">
+        <p class="eyebrow">本地个人空间</p>
+        <h1>首页总览</h1>
+        <p>正在加载本地数据...</p>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="/app.js?v=20261025-theme"></script>
+</body>
+</html>

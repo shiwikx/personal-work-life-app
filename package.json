@@ -1,0 +1,13 @@
+{
+  "name": "personal-work-life-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/server/cli.mjs",
+    "start:background": "node src/server/cli.mjs --background",
+    "test": "node --test tests/*.test.mjs tests/**/*.test.mjs",
+    "test:e2e": "node --test tests/e2e/*.test.mjs",
+    "check": "npm --version"
+  }
+}

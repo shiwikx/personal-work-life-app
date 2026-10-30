@@ -1,0 +1,23 @@
+node_modules/
+dist/
+dist-electron/
+dist-server/
+release/
+data-test/
+playwright-report/
+test-results/
+*.log
+.pnpm-store/
+data/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+backups/
+exports/
+logs/
+
+# 本地私人文件（禁止上传）
+_resume_dump.txt
+.env
+.env.*
+!.env.example
