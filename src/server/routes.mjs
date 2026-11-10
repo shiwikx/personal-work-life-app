@@ -180,7 +180,7 @@ export async function handleApi(req, res, url, store, sendJson, scheduler = null
     const date = url.searchParams.get('date') || localDateString();
     const today = listForDate(store, date);
     const todayAll = listForDate(store, date, { includeCompleted: true });
-    const all = store.listEntities({});
+    const all = store.listEntities({}).filter((entity) => entity.type !== 'autumn_task');
     const summary = {};
     for (const module of ['today', 'thesis', 'study', 'development', 'autumn', 'work']) summary[module] = { total: 0, completed: 0, open: 0 };
     for (const entity of all) {

@@ -11,7 +11,7 @@ test('八个一级页面均可渲染且导航完整', { skip: !findBrowser() }, 
   const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0, scheduler: false, persistDataRoot: false, nativeActions: false });
   const base = `http://127.0.0.1:${app.port}`;
   const pages = ['', 'today', 'thesis', 'study', 'development', 'autumn', 'work', 'settings'];
-  const navLabels = ['首页总览', '今日计划', '毕设论文', '学习计划', '开发计划', '秋招每日计划', '工作计划', '数据与设置'];
+  const navLabels = ['首页总览', '今日计划', '毕设论文', '学习计划', '开发计划', '求职计划', '工作计划', '数据与设置'];
   try {
     for (const page of pages) {
       const result = await dumpDom(`${base}/#/${page}`);

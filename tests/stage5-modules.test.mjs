@@ -43,7 +43,7 @@ test('开发计划支持项目、功能、缺陷、日志、计时和手动补�
   }
 });
 
-test('秋招每日事项进入今日计划，投递与笔试面试安排可保存', async () => {
+test('求职模块保留投递与笔试面试安排，每日秋招事项不再进入今日计划', async () => {
   const root = makeRoot();
   const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0 });
   const base = `http://127.0.0.1:${app.port}`;
@@ -56,7 +56,7 @@ test('秋招每日事项进入今日计划，投递与笔试面试安排可保�
     });
     assert.equal(application.data.item.payload.review, '表达需更精炼');
     const today = await json(base, '/api/today?date=2026-10-23');
-    assert.ok(today.data.items.some((item) => item.title === '刷两道算法题'));
+    assert.ok(!today.data.items.some((item) => item.title === '刷两道算法题'));
     const summary = await json(base, '/api/autumn/summary?date=2026-10-23');
     assert.equal(summary.data.applications.length, 1);
     assert.equal(summary.data.upcoming.length, 2);
@@ -66,7 +66,7 @@ test('秋招每日事项进入今日计划，投递与笔试面试安排可保�
   }
 });
 
-test('开发与秋招页面展示必要功能且不包含已删除入口', { skip: !findBrowser() }, async () => {
+test('开发与求职页面展示必要功能且不包含已移除入口', { skip: !findBrowser() }, async () => {
   const root = makeRoot();
   const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0 });
   const base = `http://127.0.0.1:${app.port}`;
@@ -82,7 +82,8 @@ test('开发与秋招页面展示必要功能且不包含已删除入口', { ski
 
     const autumn = await dumpDom(`${base}/#/autumn`);
     assert.equal(autumn.status, 0, autumn.stderr);
-    assert.match(autumn.stdout, /每日秋招事项/);
+    assert.match(autumn.stdout, /求职计划/);
+    assert.doesNotMatch(autumn.stdout, /每日秋招事项/);
     assert.match(autumn.stdout, /投递记录/);
     assert.match(autumn.stdout, /面试复盘/);
     assert.doesNotMatch(autumn.stdout, /公司名|岗位名|投递渠道|目标清单/);

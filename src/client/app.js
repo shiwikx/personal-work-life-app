@@ -4,7 +4,7 @@ const NAV_ITEMS = [
   { path: '/thesis', label: '毕设论文', icon: '文' },
   { path: '/study', label: '学习计划', icon: '学' },
   { path: '/development', label: '开发计划', icon: '码' },
-  { path: '/autumn', label: '秋招每日计划', icon: '招' },
+  { path: '/autumn', label: '求职计划', icon: '职' },
   { path: '/work', label: '工作计划', icon: '工' },
   { path: '/settings', label: '数据与设置', icon: '⚙' },
 ];
@@ -13,7 +13,7 @@ const MODULE_INFO = {
   thesis: { title: '毕设论文', subtitle: '选题、章节、实验、导师反馈与关键节点' },
   study: { title: '学习计划', subtitle: '课程、章节目标、学习计时、复习与笔记' },
   development: { title: '开发计划', subtitle: '项目、功能、缺陷、日志与时间投入' },
-  autumn: { title: '秋招每日计划', subtitle: '自定义每日事项、投递、笔试面试与复盘' },
+  autumn: { title: '求职计划', subtitle: '投递记录、笔试面试安排与面试复盘' },
   work: { title: '工作计划', subtitle: '任务、会议、进展、日志与日周报' },
   settings: { title: '数据与设置', subtitle: '本地数据、备份恢复、导出和提醒设置' },
 };
@@ -83,11 +83,8 @@ const MODULE_CONFIGS = {
     ],
   },
   autumn: {
-    title: '秋招每日计划', subtitle: '自定义每日事项、投递状态、笔试面试安排与面试复盘',
+    title: '求职计划', subtitle: '投递状态、笔试面试安排与面试复盘',
     sections: [
-      { type: 'autumn_task', title: '每日秋招事项', showTime: true, showReminder: true, showRecurrence: true, showPriority: true, fields: [
-        { key: 'category', label: '事项类型', payload: true, placeholder: '例如：刷题 / 改简历 / 复盘' },
-      ], cardFields: [['category', '类型']] },
       { type: 'autumn_event', title: '笔试/面试安排', showTime: true, showReminder: true, fields: [
         { key: 'eventType', label: '安排类型', type: 'select', options: [{ value: 'exam', label: '笔试' }, { value: 'interview', label: '面试' }], payload: true },
         { key: 'format', label: '形式或说明', payload: true, placeholder: '线上 / 线下 / 链接说明' },
@@ -227,7 +224,8 @@ function pageHeader(title, subtitle, extra = '') {
 
 function taskRow(item, options = {}) {
   const showDate = Boolean(options.showDate);
-  const controls = Boolean(options.controls);
+  const showEdit = Boolean(options.showEdit ?? options.controls);
+  const showDelete = Boolean(options.showDelete ?? options.controls);
   const occurrenceDate = options.date || item.occurrenceDate || item.date || state.selectedDate;
   const action = item.completedForOccurrence ? 'uncomplete' : 'complete';
   return `
@@ -251,14 +249,15 @@ function taskRow(item, options = {}) {
       </div>
       <div class="row-actions">
         <button class="ghost small" data-action="progress" data-id="${item.id}" data-date="${occurrenceDate}">进度</button>
-        ${controls ? `<button class="ghost small" data-action="edit-entity" data-id="${item.id}">编辑</button><button class="text-danger" data-action="delete-entity" data-id="${item.id}">删除</button>` : ''}
+        ${showEdit ? `<button class="ghost small" data-action="edit-entity" data-id="${item.id}">编辑</button>` : ''}
+        ${showDelete ? `<button class="text-danger" data-action="delete-entity" data-id="${item.id}" title="删除计划">删除</button>` : ''}
       </div>
     </article>
   `;
 }
 
 function moduleLabel(module) {
-  return { home: '首页', today: '今日计划', thesis: '毕设论文', study: '学习计划', development: '开发计划', autumn: '秋招', work: '工作' }[module] || module;
+  return { home: '首页', today: '今日计划', thesis: '毕设论文', study: '学习计划', development: '开发计划', autumn: '求职', work: '工作' }[module] || module;
 }
 
 async function renderHome() {
@@ -327,18 +326,16 @@ function memoCard(memo) {
 }
 
 async function renderToday() {
-  const [data, completedData] = await Promise.all([
-    api(`/api/today?date=${state.selectedDate}`),
-    api(`/api/today?date=${state.selectedDate}&includeCompleted=true`),
-  ]);
-  const completedItems = completedData.items.filter((item) => item.completedForOccurrence);
-  const allItems = [...data.items, ...completedItems].sort((a, b) => Number(a.completedForOccurrence) - Number(b.completedForOccurrence));
+  const data = await api(`/api/today?date=${state.selectedDate}&includeCompleted=true`);
+  const completedItems = data.items.filter((item) => item.completedForOccurrence);
+  const openItems = data.items.filter((item) => !item.completedForOccurrence);
+  const allItems = [...data.items].sort((a, b) => Number(a.completedForOccurrence) - Number(b.completedForOccurrence));
   const content = `
     ${pageHeader('今日计划', '统一安排自己的事项，并自动汇总各模块当天的计划', `
       <label class="date-control">日期 <input type="date" value="${state.selectedDate}" data-action="change-date" /></label>
     `)}
     <section class="panel">
-      <div class="panel-head"><div><p class="eyebrow">ADD</p><h2>添加今日事项</h2></div><span class="count">${data.items.length} 项未完成</span></div>
+      <div class="panel-head"><div><p class="eyebrow">ADD</p><h2>添加今日事项</h2></div><span class="count">${openItems.length} 项未完成</span></div>
       <form class="today-task-form" data-form="today-task">
         <div class="form-grid today-task-grid">
           <label class="field wide"><span>事项标题</span><input name="title" placeholder="要做什么？" required /></label>
@@ -354,8 +351,8 @@ async function renderToday() {
       </form>
     </section>
     <section class="panel">
-      <div class="panel-head"><div><p class="eyebrow">SCHEDULE</p><h2>${state.selectedDate} 的计划（含已完成记录）</h2></div><span class="count">${data.items.length} 未完成 · ${completedItems.length} 已完成</span></div>
-      <div class="task-list">${allItems.length ? allItems.map((item) => taskRow(item)).join('') : '<div class="empty">这一天还没有计划事项</div>'}</div>
+      <div class="panel-head"><div><p class="eyebrow">SCHEDULE</p><h2>${state.selectedDate} 的计划（含已完成记录）</h2></div><span class="count">${openItems.length} 未完成 · ${completedItems.length} 已完成</span></div>
+      <div class="task-list">${allItems.length ? allItems.map((item) => taskRow(item, { showDelete: true })).join('') : '<div class="empty">这一天还没有计划事项</div>'}</div>
     </section>
   `;
   shell(content);
@@ -459,7 +456,7 @@ async function renderModuleInsights(route, items) {
   if (route === 'autumn') {
     const summary = await api(`/api/autumn/summary?date=${state.selectedDate}`);
     const next = summary.nextExamOrInterview;
-    return `<section class="panel insights-panel"><div class="panel-head"><div><p class="eyebrow">APPLICATION PULSE</p><h2>投递与笔试面试安排</h2></div><span class="count">${summary.applications.length} 条投递</span></div><div class="stat-grid small-stats"><div class="stat-card accent"><span>下一场笔试/面试</span><strong>${next ? escapeHtml(String(next.at).replace('T', ' ')) : '暂无安排'}</strong><small>${next ? escapeHtml(next.title) : '可在投递记录中安排时间'}</small></div><div class="stat-card"><span>进行中的流程</span><strong>${Object.values(summary.statusCounts).reduce((sum, value) => sum + value, 0)}</strong><small>自定义事项与投递分别管理</small></div><div class="stat-card"><span>每日事项</span><strong>${items.filter((item) => item.type === 'autumn_task' && item.status !== 'completed').length}</strong><small>自动汇总到今日计划</small></div></div></section>`;
+    return `<section class="panel insights-panel"><div class="panel-head"><div><p class="eyebrow">APPLICATION PULSE</p><h2>投递与笔试面试安排</h2></div><span class="count">${summary.applications.length} 条投递</span></div><div class="stat-grid small-stats"><div class="stat-card accent"><span>下一场笔试/面试</span><strong>${next ? escapeHtml(String(next.at).replace('T', ' ')) : '暂无安排'}</strong><small>${next ? escapeHtml(next.title) : '可在投递记录中安排时间'}</small></div><div class="stat-card"><span>进行中的流程</span><strong>${Object.values(summary.statusCounts).reduce((sum, value) => sum + value, 0)}</strong><small>投递记录与笔试面试安排统一管理</small></div><div class="stat-card"><span>待进行安排</span><strong>${summary.upcoming.length}</strong><small>笔试与面试日程</small></div></div></section>`;
   }
   if (route === 'work') {
     const reports = await api('/api/work/reports');
@@ -624,10 +621,10 @@ app.addEventListener('click', async (event) => {
     }
     if (action === 'cancel-edit') { state.editing = null; await render(); return; }
     if (action === 'delete-entity') {
-      if (!confirm('确定删除这条记录？')) return;
+      if (!confirm('确定删除这条计划？删除后会从所属模块和所有日期中移除，且无法撤销。')) return;
       await api(`/api/entities/${id}`, { method: 'DELETE' });
       if (state.editing?.id === id) state.editing = null;
-      showNotice('记录已删除');
+      showNotice('计划已删除');
       await render();
       return;
     }
@@ -796,8 +793,6 @@ app.addEventListener('submit', async (event) => {
 
 window.addEventListener('hashchange', render);
 render();
-
-
 
 
 

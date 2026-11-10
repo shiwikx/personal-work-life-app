@@ -850,3 +850,61 @@ html[data-theme="dark"] .field,
 html[data-theme="dark"] .meta-line,
 html[data-theme="dark"] .entity-facts { color: var(--muted); }
 html[data-theme="dark"] .notice { background: #24506b; }
+
+/* Performance tuning: keep the glass look without expensive nested live blur. */
+body {
+  background-attachment: scroll;
+}
+body::before,
+#app::before {
+  display: none;
+}
+.panel,
+.stat-card,
+.module-card {
+  -webkit-backdrop-filter: blur(12px) saturate(112%);
+  backdrop-filter: blur(12px) saturate(112%);
+}
+.sidebar {
+  -webkit-backdrop-filter: blur(10px) saturate(108%);
+  backdrop-filter: blur(10px) saturate(108%);
+}
+.task-row,
+.memo-card,
+.entity-card,
+.report-card,
+.export-card,
+.backup-row,
+.today-task-form,
+.add-form-disclosure,
+.entity-form,
+input,
+textarea,
+select,
+.ghost,
+.theme-toggle,
+.page-header .ghost {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.panel::after,
+.stat-card::after,
+.module-card::after {
+  mix-blend-mode: normal;
+  opacity: .34;
+}
+.task-row,
+.module-card,
+.primary,
+.ghost,
+.theme-toggle {
+  transition-duration: .1s;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

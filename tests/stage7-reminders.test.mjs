@@ -56,7 +56,7 @@ test('调度器只发送一次通知并遵守免打扰时段', () => {
   }
 });
 
-test('提醒 API 支持查询、补发和稍后提醒，秋招面试安排也会进入今日计划', async () => {
+test('提醒 API 支持查询、补发和稍后提醒，求职笔试/面试安排也会进入今日计划', async () => {
   const root = makeRoot();
   const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0, scheduler: false });
   const base = `http://127.0.0.1:${app.port}`;

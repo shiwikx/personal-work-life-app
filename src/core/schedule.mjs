@@ -114,6 +114,7 @@ export function listForDate(store, date, { module, includeCompleted = false } = 
   const entities = store.listEntities({ module });
   const result = [];
   for (const entity of entities) {
+    if (entity.type === 'autumn_task') continue;
     if (occursOn(entity, date)) {
       const item = decorateEntity(store, entity, date);
       if (includeCompleted || !item.completedForOccurrence) result.push(item);

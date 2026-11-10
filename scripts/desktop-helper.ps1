@@ -293,7 +293,9 @@ function Check-OverlaySignal {
       Remove-Item -LiteralPath $signalPath -Force -ErrorAction SilentlyContinue
     }
   } catch {}
-}$seenReminders = @{}
+}
+
+$seenReminders = @{}
 function Show-DueReminders {
   try {
     $due = Invoke-RestMethod -Uri "$ApiBase/api/reminders/due?includeNotified=true&recentMinutes=10" -TimeoutSec 3
@@ -338,7 +340,7 @@ function Show-DueReminders {
         $current = $this.Tag
         try {
           Invoke-RestMethod -Method Post -Uri "$ApiBase/api/entities/$($current.entityId)/complete" -ContentType "application/json" -Body (@{ date = $current.occurrenceDate } | ConvertTo-Json) | Out-Null
-          $dialog.Close()
+          $this.Parent.Close()
           Refresh-Today
         } catch { [System.Windows.Forms.MessageBox]::Show("完成失败：$($_.Exception.Message)") }
       })
@@ -353,7 +355,7 @@ function Show-DueReminders {
         $current = $this.Tag
         try {
           Invoke-RestMethod -Method Post -Uri "$ApiBase/api/entities/$($current.entityId)/snooze" -ContentType "application/json" -Body (@{ date = $current.occurrenceDate; minutes = 10 } | ConvertTo-Json) | Out-Null
-          $dialog.Close()
+          $this.Parent.Close()
         } catch { [System.Windows.Forms.MessageBox]::Show("稍后提醒设置失败：$($_.Exception.Message)") }
       })
       $dialog.Controls.Add($snoozeButton)
@@ -366,10 +368,10 @@ function Show-DueReminders {
       $detailButton.Add_Click({
         $current = $this.Tag
         Start-Process "$ApiBase/#/$($current.module)"
-        $dialog.Close()
+        $this.Parent.Close()
       })
       $dialog.Controls.Add($detailButton)
-      $dialog.ShowDialog() | Out-Null
+      $dialog.Show()
     }
   } catch {}
 }

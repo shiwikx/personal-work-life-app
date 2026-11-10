@@ -7,7 +7,7 @@
 | /thesis | 毕设论文 |
 | /study | 学习计划 |
 | /development | 开发计划 |
-| /autumn | 秋招每日计划 |
+| /autumn | 求职计划 |
 | /work | 工作计划 |
 | /settings | 数据与设置 |
 

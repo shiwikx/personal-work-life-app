@@ -32,15 +32,18 @@ test('开发计划包含阶段 0 到阶段 9', () => {
 
 test('路由基线只包含确认的八个模块', () => {
   const routes = read('docs/routes.md');
-  const confirmed = ['首页总览', '今日计划', '毕设论文', '学习计划', '开发计划', '秋招每日计划', '工作计划', '数据与设置'];
+  const confirmed = ['首页总览', '今日计划', '毕设论文', '学习计划', '开发计划', '求职计划', '工作计划', '数据与设置'];
   for (const name of confirmed) assert.ok(routes.includes(name), name);
   for (const removed of ['自媒体', '健身计划', '饮食计划', '游戏娱乐']) {
     assert.ok(!routes.includes(removed), removed);
   }
 });
-test('PRD v1.2 包含当前视觉、主题和交互要求', () => {
+test('PRD v1.4 包含当前视觉、主题、交互和计划删除要求', () => {
   const prd = read('PRD.md');
-  assert.match(prd, /文档版本：v1\.2/);
+  assert.match(prd, /文档版本：v1\.4/);
+  assert.match(prd, /今日计划中的每条事项均提供删除入口/);
+  assert.match(prd, /从所属模块及所有日期中移除/);
+  assert.match(prd, /页面中不存在“每日秋招事项”入口/);
   assert.match(prd, /### 2\.4 视觉与主题规范/);
   assert.match(prd, /主界面参考 macOS 天气 App/);
   assert.match(prd, /浅色、深色主题切换/);

@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { createApp } from '../src/server/app.mjs';
+import { localDateString } from '../src/core/date.mjs';
 import { dumpDom, findBrowser } from './helpers/browser.mjs';
 
 const read = (file) => readFileSync(join(process.cwd(), file), 'utf8');
@@ -24,18 +25,19 @@ test('问题2：完成任务后今日计划保留已完成记录', { skip: !find
   const root = mkdtempSync(join(tmpdir(), 'pwla-completed-today-'));
   const app = await createApp({ dataRoot: root, clientRoot: join(process.cwd(), 'src', 'client'), port: 0, scheduler: false, persistDataRoot: false, nativeActions: false });
   const base = `http://127.0.0.1:${app.port}`;
+  const selectedDate = localDateString();
   try {
     const tasks = [
       { module: 'today', type: 'task', title: '今日自定义完成项' },
       { module: 'study', type: 'study_review', title: '模块已完成复习' },
     ];
     for (const task of tasks) {
-      const created = await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...task, date: '2026-10-25' }) }).then((response) => response.json());
-      await fetch(`${base}/api/entities/${created.item.id}/complete`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ date: '2026-10-25' }) });
+      const created = await fetch(`${base}/api/entities`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...task, date: selectedDate }) }).then((response) => response.json());
+      await fetch(`${base}/api/entities/${created.item.id}/complete`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ date: selectedDate }) });
     }
-    const open = await fetch(`${base}/api/today?date=2026-10-25`).then((response) => response.json());
+    const open = await fetch(`${base}/api/today?date=${selectedDate}`).then((response) => response.json());
     assert.equal(open.items.length, 0);
-    const all = await fetch(`${base}/api/today?date=2026-10-25&includeCompleted=true`).then((response) => response.json());
+    const all = await fetch(`${base}/api/today?date=${selectedDate}&includeCompleted=true`).then((response) => response.json());
     assert.equal(all.items.filter((item) => item.completedForOccurrence).length, 2);
     const page = await dumpDom(`${base}/#/today`);
     assert.equal(page.status, 0, page.stderr);

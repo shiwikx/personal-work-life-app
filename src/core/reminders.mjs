@@ -12,6 +12,7 @@ function reminderTime(instance) {
 }
 
 function eventInstances(entity, targetDate) {
+  if (entity.type === 'autumn_task') return [];
   const instances = [];
   if (entity.type !== 'autumn_application' && entity.date && occursOn(entity, targetDate)) {
     instances.push({ kind: 'main', key: 'main', date: targetDate, scheduledTime: entity.scheduledTime, reminderMinutes: entity.reminderMinutes, title: entity.title });
