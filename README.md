@@ -1,6 +1,7 @@
 # 个人工作生活 APP
 > Windows 10/11 x64 便携版，无需安装 Node.js。
 
+
 ## 下载
 
 [下载最新 Windows 便携版](https://github.com/shiwikx/personal-work-life-app/releases/latest)
@@ -8,6 +9,22 @@
 下载后解压，双击 `启动个人工作生活APP.cmd`。请勿直接在压缩包内运行。
 
 本机单用户使用的工作生活管理应用，包含首页、今日计划、毕设论文、学习计划、开发计划、求职计划、工作计划和数据设置 8 个模块。
+
+## 界面预览
+
+### 首页
+
+![首页](docs/images/home.png)
+
+### 今日计划
+
+![今日计划](docs/images/today.png)
+
+### 数据与设置
+
+![数据与设置](docs/images/settings.png)
+
+
 
 ## 启动
 
