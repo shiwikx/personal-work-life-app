@@ -2,11 +2,18 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { homedir } from 'node:os';
 
-export const DEFAULT_DATA_ROOT = 'D:\\个人工作生活APP\\data';
+function localAppDataRoot() {
+  return process.env.LOCALAPPDATA || join(homedir(), 'AppData', 'Local');
+}
+
+export function defaultDataRoot() {
+  return join(localAppDataRoot(), 'PersonalWorkLifeApp', 'data');
+}
+
+export const DEFAULT_DATA_ROOT = defaultDataRoot();
 
 export function bootstrapConfigPath() {
-  const base = process.env.LOCALAPPDATA || join(homedir(), 'AppData', 'Local');
-  return join(base, 'PersonalWorkLifeApp', 'bootstrap.json');
+  return join(localAppDataRoot(), 'PersonalWorkLifeApp', 'bootstrap.json');
 }
 
 export function readBootstrapConfig() {
@@ -27,7 +34,7 @@ export function resolveDataRoot({ cliDataDir, envDataDir, testMode = false } = {
   if (envDataDir) return resolve(envDataDir);
   if (testMode) return resolve(process.cwd(), 'data-test');
   const boot = readBootstrapConfig();
-  return resolve(boot.dataRoot || DEFAULT_DATA_ROOT);
+  return resolve(boot.dataRoot || defaultDataRoot());
 }
 
 export function ensureDirectory(path) {

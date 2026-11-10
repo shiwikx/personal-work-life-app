@@ -53,7 +53,7 @@ const manifest = {
   builtAt: new Date().toISOString(),
   runtime: 'Node.js embedded',
   entry: '启动个人工作生活APP.cmd',
-  dataRoot: 'D:\\个人工作生活APP\\data',
+  dataRoot: '%LOCALAPPDATA%\\PersonalWorkLifeApp\\data',
 };
 writeFileSync(join(workDir, 'release-manifest.json'), JSON.stringify(manifest, null, 2), 'utf8');
 

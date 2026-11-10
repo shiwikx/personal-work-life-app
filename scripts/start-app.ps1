@@ -30,7 +30,7 @@ if (-not (Test-AppRunning)) {
     Start-Sleep -Milliseconds 300
     if (Test-AppRunning) { $ready = $true; break }
   }
-  if (-not $ready) { throw "本地后台启动失败，请检查 D 盘数据目录和端口 4123。" }
+  if (-not $ready) { throw "本地后台启动失败，请检查数据目录是否可写、端口 4123 是否被占用，以及 Windows 安全软件是否拦截。" }
 }
 
 if (-not $NoBrowser) { Start-Process $Url }
